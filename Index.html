@@ -1,0 +1,2087 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" id="themeColorMeta" content="#006A60" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Lista de Compras</title>
+
+  <style>
+    /* =====================================================
+       DESIGN TOKENS -- Material You Dynamic Color System
+       Light Theme (padrão) + Dark Theme via [data-theme]
+    ===================================================== */
+    :root {
+      --clr-primary:              #006A60;
+      --clr-on-primary:           #FFFFFF;
+      --clr-primary-container:    #9EF2E4;
+      --clr-on-primary-container: #00201C;
+      --clr-secondary:            #4A6360;
+      --clr-on-secondary:         #FFFFFF;
+      --clr-secondary-container:  #CCE8E4;
+      --clr-on-secondary-container: #051F1C;
+      --clr-surface:              #F4FAF8;
+      --clr-surface-1:            #EBF4F2;
+      --clr-on-surface:           #191C1C;
+      --clr-on-surface-var:       #3F4948;
+      --clr-outline:              #6F7978;
+      --clr-outline-var:          #BEC9C7;
+      --clr-background:           #F4FAF8;
+      --clr-error:                #BA1A1A;
+      --clr-success:              #006E1C;
+      --clr-on-success:           #FFFFFF;
+      --shadow-1: 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-2: 0 3px 8px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
+      --shadow-3: 0 8px 24px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+      --r-xs: 6px;  --r-sm: 12px; --r-md: 16px;
+      --r-lg: 24px; --r-xl: 28px; --r-full: 9999px;
+      --font:      -apple-system, "Segoe UI", system-ui, "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, "SF Mono", "Fira Code", monospace;
+      --ease:   cubic-bezier(0.2, 0, 0, 1);
+      --t-fast: 150ms; --t-med: 220ms; --t-slow: 350ms;
+    }
+
+    [data-theme="dark"] {
+      --clr-primary:              #82D5C9;
+      --clr-on-primary:           #003731;
+      --clr-primary-container:    #005048;
+      --clr-on-primary-container: #9EF2E4;
+      --clr-secondary:            #B0CCCA;
+      --clr-on-secondary:         #1B3533;
+      --clr-secondary-container:  #324B49;
+      --clr-on-secondary-container: #CCE8E4;
+      --clr-surface:              #191C1C;
+      --clr-surface-1:            #1E2322;
+      --clr-on-surface:           #E0E3E2;
+      --clr-on-surface-var:       #BEC9C7;
+      --clr-outline:              #899392;
+      --clr-outline-var:          #3F4948;
+      --clr-background:           #101414;
+      --clr-error:                #FFB4AB;
+      --clr-success:              #82DB8F;
+      --clr-on-success:           #003909;
+      --shadow-1: 0 1px 3px rgba(0,0,0,.32);
+      --shadow-2: 0 3px 8px rgba(0,0,0,.28);
+      --shadow-3: 0 8px 24px rgba(0,0,0,.38);
+    }
+
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--clr-background);
+      color: var(--clr-on-surface);
+      min-height: 100dvh;
+      display: flex; flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      transition: background var(--t-slow) var(--ease), color var(--t-slow) var(--ease);
+      overscroll-behavior: none;
+    }
+    button { font-family: var(--font); cursor: pointer; }
+    input  { font-family: var(--font); }
+
+    /* =====================================================
+       TOP APP BAR
+    ===================================================== */
+    .app-bar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px 10px 20px;
+      background: color-mix(in srgb, var(--clr-surface) 92%, transparent);
+      border-bottom: 1px solid var(--clr-outline-var);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+    }
+    .app-bar-title { flex: 1; font-size: 19px; font-weight: 700; letter-spacing: -.4px; }
+
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--r-full);
+      border: none; background: transparent; color: var(--clr-on-surface-var);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+    }
+    .icon-btn:hover  { background: color-mix(in srgb, var(--clr-on-surface) 8%, transparent); }
+    .icon-btn:active { transform: scale(.90); }
+
+    /* Telas bem estreitas: app-bar agora tem 4 ícones (tema, exportar,
+       importar, limpar) além do título -- encolhe um pouco pra não apertar. */
+    @media (max-width: 380px) {
+      .app-bar { padding-left: 14px; gap: 4px; }
+      .app-bar-title { font-size: 16px; }
+      .icon-btn { width: 36px; height: 36px; }
+      /* 3 abas cabendo em telas estreitas */
+      .nav-tab { font-size: 11px; gap: 4px; padding: 11px 4px 9px; }
+      .nav-tab svg { width: 13px; height: 13px; }
+    }
+
+    /* =====================================================
+       NAVIGATION TABS
+    ===================================================== */
+    .nav-tabs { display: flex; background: var(--clr-surface); border-bottom: 1px solid var(--clr-outline-var); }
+
+    .nav-tab {
+      flex: 1; padding: 13px 8px 11px;
+      border: none; border-bottom: 3px solid transparent;
+      background: transparent; color: var(--clr-on-surface-var);
+      font-size: 13px; font-weight: 500; letter-spacing: .1px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: color var(--t-fast) var(--ease),
+                  border-color var(--t-fast) var(--ease),
+                  background var(--t-fast) var(--ease);
+    }
+    .nav-tab:hover:not(.active) {
+      background: color-mix(in srgb, var(--clr-on-surface) 5%, transparent);
+      color: var(--clr-on-surface);
+    }
+    .nav-tab.active { color: var(--clr-primary); border-bottom-color: var(--clr-primary); font-weight: 700; }
+
+    /* =====================================================
+       LAYOUT
+    ===================================================== */
+    .main { flex: 1; overflow-y: auto; padding: 16px 16px 140px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .inner { max-width: 600px; margin: 0 auto; }
+
+    /* =====================================================
+       QUICK-ADD INPUT
+    ===================================================== */
+    .quick-add-wrap {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; background: var(--clr-surface);
+      border-radius: var(--r-lg); border: 1.5px solid var(--clr-outline-var);
+      box-shadow: var(--shadow-1); margin-bottom: 16px;
+      transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+    }
+    .quick-add-wrap:focus-within {
+      border-color: var(--clr-primary);
+      box-shadow: var(--shadow-2), 0 0 0 3px color-mix(in srgb, var(--clr-primary) 18%, transparent);
+    }
+    .quick-add-input {
+      flex: 1; border: none; outline: none;
+      background: transparent; font-size: 15px; color: var(--clr-on-surface);
+    }
+    .quick-add-input::placeholder { color: var(--clr-outline); }
+
+    /* =====================================================
+       SISTEMA DE CORES POR CATEGORIA
+       Cada .cat-group expõe --cat-clr como CSS Custom Property.
+       Todos os filhos coloridos consomem essa variável.
+
+       Light mode: usa a cor diretamente (tons saturados, boa
+       legibilidade sobre fundos claros).
+
+       Dark mode: clareia automaticamente via color-mix com branco,
+       garantindo contraste adequado sobre superfícies escuras.
+    ===================================================== */
+    .cat-group {
+      margin-bottom: 12px;
+      border-radius: var(--r-lg);
+      /* Barra lateral colorida: identidade visual da categoria */
+      border-left: 4px solid var(--cat-clr, var(--clr-primary));
+      border-top: 1px solid var(--clr-outline-var);
+      border-right: 1px solid var(--clr-outline-var);
+      border-bottom: 1px solid var(--clr-outline-var);
+      background: var(--clr-surface);
+      box-shadow: var(--shadow-1);
+      overflow: hidden;
+      transition: box-shadow var(--t-fast) var(--ease);
+    }
+
+    .cat-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 14px 13px 16px;
+      /* Fundo levemente tingido com a cor da categoria */
+      background: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 9%, var(--clr-surface));
+      border-bottom: 1px solid var(--clr-outline-var);
+      user-select: none;
+    }
+
+    /* Rótulo da categoria */
+    .cat-label {
+      flex: 1;
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      /* Light mode: cor da categoria (tons escuros têm boa legibilidade no fundo claro) */
+      color: var(--cat-clr, var(--clr-primary));
+    }
+    /* Dark mode: clareia a cor da categoria para garantir contraste no fundo escuro */
+    [data-theme="dark"] .cat-label {
+      color: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 65%, #ffffff);
+    }
+
+    .cat-count {
+      font-size: 11px; color: var(--clr-outline); font-weight: 500; flex-shrink: 0;
+    }
+
+    /* Badge ✓ verde: visível quando categoria está 100% concluída E recolhida */
+    .cat-done-badge {
+      display: none;
+      width: 18px; height: 18px; border-radius: var(--r-full);
+      background: var(--clr-success); color: var(--clr-on-success);
+      align-items: center; justify-content: center; flex-shrink: 0;
+      animation: pop-in 200ms var(--ease) both;
+    }
+    .cat-done-badge.show { display: flex; }
+
+    @keyframes pop-in {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* Seta do acordeão */
+    .cat-arrow {
+      width: 28px; height: 28px; border-radius: var(--r-full);
+      border: none; background: transparent; flex-shrink: 0;
+      color: var(--cat-clr, var(--clr-primary));
+      display: flex; align-items: center; justify-content: center;
+    }
+    [data-theme="dark"] .cat-arrow {
+      color: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 65%, #ffffff);
+    }
+    .cat-arrow svg { transition: transform var(--t-med) var(--ease); }
+    /* Colapsada: a seta aponta para baixo */
+    .cat-group.collapsed .cat-arrow svg { transform: rotate(180deg); }
+
+    /* Header clicável (Aba 2 -- acordeão) */
+    .cat-header[data-action="collapse"] { cursor: pointer; }
+    .cat-header[data-action="collapse"]:hover {
+      background: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 15%, var(--clr-surface));
+    }
+    .cat-header[data-action="collapse"]:active {
+      background: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 20%, var(--clr-surface));
+    }
+
+    /* Acordeão via grid-template-rows (mais suave que max-height) */
+    .cat-body-wrap {
+      display: grid; grid-template-rows: 1fr;
+      transition: grid-template-rows var(--t-slow) var(--ease);
+    }
+    .cat-group.collapsed .cat-body-wrap { grid-template-rows: 0fr; }
+    .cat-body-inner { overflow: hidden; }
+
+    /* =====================================================
+       LIST ITEMS
+    ===================================================== */
+    .list-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px 12px 16px;
+      border-bottom: 1px solid var(--clr-outline-var);
+      background: var(--clr-surface);
+      transition: background var(--t-fast) var(--ease);
+      animation: item-in var(--t-med) var(--ease) both;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover { background: color-mix(in srgb, var(--clr-on-surface) 3%, var(--clr-surface)); }
+
+    @keyframes item-in {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Checkbox genérico */
+    .chk {
+      width: 22px; height: 22px; flex-shrink: 0;
+      border-radius: 6px; border: 2px solid var(--clr-outline);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--t-fast) var(--ease);
+    }
+    .chk:hover { border-color: var(--clr-primary); background: color-mix(in srgb, var(--clr-primary) 10%, transparent); }
+    /* Selecionado para categorização (Aba 1) */
+    .chk.sel  { background: var(--clr-primary); border-color: var(--clr-primary); color: var(--clr-on-primary); }
+    /* Item comprado (Aba 2) */
+    .chk.done { background: var(--clr-success); border-color: var(--clr-success); color: var(--clr-on-success); }
+
+    /* Nome do item */
+    .item-name {
+      flex: 1; font-size: 15px; font-weight: 400; color: var(--clr-on-surface); line-height: 1.3;
+      transition: color var(--t-fast) var(--ease);
+    }
+    /* Riscado quando comprado */
+    .item-name.done { text-decoration: line-through; color: var(--clr-on-surface-var); }
+
+    /* =====================================================
+       INPUTS DE QUANTIDADE E PREÇO (Aba 2)
+    ===================================================== */
+    .item-inputs { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .input-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .input-group label {
+      font-size: 9px; font-weight: 600; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--clr-outline);
+    }
+
+    .num-input {
+      border: 1.5px solid var(--clr-outline-var);
+      border-radius: var(--r-sm);
+      background: var(--clr-surface-1); color: var(--clr-on-surface);
+      font-family: var(--font-mono); font-size: 13px; text-align: center;
+      outline: none; padding: 5px 4px;
+      transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+      -moz-appearance: textfield;
+    }
+    .num-input::-webkit-outer-spin-button,
+    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .num-input:focus {
+      border-color: var(--clr-primary);
+      background: color-mix(in srgb, var(--clr-primary) 6%, var(--clr-surface));
+    }
+    .input-qty   { width: 50px; }
+    .input-price { width: 68px; }
+
+    /* Total calculado por item -- herda --cat-clr do grupo pai */
+    .item-total-cell { min-width: 72px; text-align: right; flex-shrink: 0; }
+    .item-total-val {
+      font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+      color: var(--cat-clr, var(--clr-primary));
+      letter-spacing: -.3px; display: block;
+    }
+    [data-theme="dark"] .item-total-val {
+      color: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 65%, #ffffff);
+    }
+    .item-total-label {
+      font-size: 9px; font-weight: 600; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--clr-outline); display: block; text-align: right;
+    }
+
+    /* =====================================================
+       SUBTOTAL DE CATEGORIA -- herda --cat-clr do grupo pai
+    ===================================================== */
+    .cat-subtotal {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      padding: 10px 16px;
+      background: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 6%, var(--clr-surface));
+      border-top: 1px solid var(--clr-outline-var);
+    }
+    .cat-subtotal-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--clr-on-surface-var);
+    }
+    .cat-subtotal-val {
+      font-family: var(--font-mono); font-size: 15px; font-weight: 800; letter-spacing: -.3px;
+      color: var(--cat-clr, var(--clr-primary));
+    }
+    [data-theme="dark"] .cat-subtotal-val {
+      color: color-mix(in srgb, var(--cat-clr, var(--clr-primary)) 65%, #ffffff);
+    }
+
+    /* =====================================================
+       BOTÃO ADICIONAR ITEM
+    ===================================================== */
+    .add-item-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 16px; border-radius: var(--r-lg);
+      border: 1.5px dashed var(--clr-outline-var);
+      color: var(--clr-on-surface-var); font-size: 14px; font-weight: 500;
+      cursor: pointer; margin-top: 8px; background: transparent; width: 100%;
+      transition: all var(--t-fast) var(--ease);
+    }
+    .add-item-row:hover { border-color: var(--clr-primary); color: var(--clr-primary); background: color-mix(in srgb, var(--clr-primary) 5%, transparent); }
+    .add-item-row:active { transform: scale(.98); }
+
+    /* =====================================================
+       ESTADO VAZIO
+    ===================================================== */
+    .empty-state { text-align: center; padding: 56px 24px; }
+    .empty-emoji { font-size: 52px; margin-bottom: 16px; }
+    .empty-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+    .empty-body  { font-size: 14px; color: var(--clr-on-surface-var); line-height: 1.6; }
+
+    /* =====================================================
+       ACTION BAR FLUTUANTE (seleção em massa -- Aba 1)
+    ===================================================== */
+    .action-bar {
+      position: fixed; bottom: 78px;
+      left: 50%; transform: translateX(-50%) translateY(30px);
+      opacity: 0; pointer-events: none;
+      background: var(--clr-surface); border: 1px solid var(--clr-outline-var);
+      border-radius: var(--r-xl); box-shadow: var(--shadow-3);
+      padding: 10px 10px 10px 18px;
+      display: flex; align-items: center; gap: 10px;
+      z-index: 150; white-space: nowrap; max-width: calc(100vw - 32px);
+      transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+    }
+    .action-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; }
+    .action-bar-label { font-size: 14px; font-weight: 600; color: var(--clr-on-surface); flex: 1; }
+
+    /* =====================================================
+       FOOTER -- TOTAL GERAL (fixado na base, Aba 2)
+    ===================================================== */
+    .footer-rail {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 160;
+      display: flex; justify-content: center;
+    }
+    .footer-inner {
+      width: 100%; max-width: 600px;
+      background: color-mix(in srgb, var(--clr-surface) 95%, transparent);
+      border-top: 1px solid var(--clr-outline-var);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      padding: 12px 24px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-meta { display: flex; flex-direction: column; gap: 1px; }
+    .footer-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--clr-on-surface-var); }
+    .footer-count { font-size: 12px; color: var(--clr-on-surface-var); }
+    .footer-total { font-family: var(--font-mono); font-size: 26px; font-weight: 800; color: var(--clr-primary); letter-spacing: -.5px; }
+
+    /* =====================================================
+       BOTÕES GENÉRICOS
+    ===================================================== */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: var(--r-full); border: none;
+      font-size: 13px; font-weight: 700; letter-spacing: .2px;
+      transition: all var(--t-fast) var(--ease); white-space: nowrap;
+    }
+    .btn:active { transform: scale(.96); }
+    .btn-filled  { background: var(--clr-primary); color: var(--clr-on-primary); }
+    .btn-filled:hover { box-shadow: var(--shadow-2); filter: brightness(1.06); }
+    .btn-tonal   { background: var(--clr-secondary-container); color: var(--clr-on-secondary-container); }
+    .btn-tonal:hover { filter: brightness(.95); }
+    .btn-text    { background: transparent; color: var(--clr-primary); padding: 9px 12px; }
+    .btn-text:hover { background: color-mix(in srgb, var(--clr-primary) 8%, transparent); }
+    .btn-danger  { background: transparent; color: var(--clr-error); border: 1.5px solid color-mix(in srgb, var(--clr-error) 50%, transparent); }
+    .btn-danger:hover { background: color-mix(in srgb, var(--clr-error) 8%, transparent); }
+
+    /* =====================================================
+       OVERLAY / BOTTOM SHEET
+    ===================================================== */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300;
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--t-med) var(--ease);
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    .bottom-sheet {
+      background: var(--clr-surface); border-radius: var(--r-xl) var(--r-xl) 0 0;
+      width: 100%; max-width: 600px; padding: 8px 24px 32px;
+      box-shadow: var(--shadow-3); max-height: 85dvh; overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform var(--t-slow) var(--ease);
+      overscroll-behavior: contain;
+    }
+    .overlay.open .bottom-sheet { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 36px; height: 4px; background: var(--clr-outline-var);
+      border-radius: var(--r-full); margin: 10px auto 20px;
+    }
+    .sheet-title  { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .sheet-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+    /* =====================================================
+       LISTA DE CATEGORIAS NO MODAL
+    ===================================================== */
+    .modal-cat-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+    .modal-cat-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: var(--r-md);
+      border: 1.5px solid var(--clr-outline-var);
+      cursor: pointer; font-size: 15px; font-weight: 500;
+      color: var(--clr-on-surface); background: var(--clr-surface);
+      transition: all var(--t-fast) var(--ease);
+    }
+    .modal-cat-item:hover  { border-color: var(--clr-primary); background: color-mix(in srgb, var(--clr-primary) 5%, var(--clr-surface)); }
+    .modal-cat-item.active { border-color: var(--clr-primary); background: var(--clr-primary-container); color: var(--clr-on-primary-container); }
+
+    /* Bolinha de cor da categoria na lista do modal */
+    .cat-color-dot {
+      width: 14px; height: 14px; border-radius: var(--r-full); flex-shrink: 0;
+      /* Borda sutil para que cores claras (ex: PERECÍVEIS) fiquem visíveis no fundo claro */
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    /* =====================================================
+       SEÇÃO DE NOVA CATEGORIA (com seletor de cores)
+    ===================================================== */
+    .new-cat-section {
+      display: none;
+      padding: 16px;
+      background: color-mix(in srgb, var(--clr-primary) 5%, var(--clr-surface));
+      border-radius: var(--r-md);
+      border: 1.5px solid var(--clr-outline-var);
+      margin-bottom: 4px;
+      animation: item-in var(--t-med) var(--ease) both;
+    }
+    .new-cat-section.visible { display: block; }
+
+    .new-cat-input {
+      width: 100%; padding: 12px 16px; border-radius: var(--r-md);
+      border: 1.5px solid var(--clr-outline-var);
+      background: var(--clr-surface); color: var(--clr-on-surface);
+      font-size: 15px; outline: none; margin-bottom: 16px;
+      transition: border-color var(--t-fast) var(--ease);
+    }
+    .new-cat-input:focus { border-color: var(--clr-primary); }
+
+    .color-picker-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--clr-on-surface-var); margin-bottom: 10px;
+    }
+
+    /* Grid de bolinhas de cores pré-definidas */
+    .color-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+
+    .color-swatch {
+      width: 34px; height: 34px; border-radius: var(--r-full);
+      border: 3px solid transparent; cursor: pointer; flex-shrink: 0;
+      transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+    }
+    .color-swatch:hover { transform: scale(1.12); }
+    /* Ativo: anel duplo de destaque (cor de superfície + cor de texto) */
+    .color-swatch.active {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 2px var(--clr-surface), 0 0 0 4px var(--clr-on-surface);
+    }
+
+    /* Input de cor totalmente personalizada */
+    .custom-color-row { display: flex; align-items: center; gap: 10px; }
+    .custom-color-row label { font-size: 13px; color: var(--clr-on-surface-var); flex: 1; }
+    .custom-color-input {
+      width: 44px; height: 34px; border-radius: var(--r-sm);
+      border: 1.5px solid var(--clr-outline-var);
+      padding: 3px; cursor: pointer; background: none;
+      transition: border-color var(--t-fast) var(--ease);
+    }
+    .custom-color-input:hover { border-color: var(--clr-primary); }
+    .custom-color-input:focus { border-color: var(--clr-primary); outline: none; }
+
+    /* =====================================================
+       SCROLLBAR SUTIL
+    ===================================================== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--clr-outline-var); border-radius: 4px; }
+
+    /* =====================================================
+       DRAG HANDLE -- reordenação de itens (toque/mouse)
+    ===================================================== */
+    .drag-handle {
+      width: 22px; height: 28px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--clr-outline); cursor: grab; touch-action: none;
+      border-radius: var(--r-xs);
+      transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .drag-handle:hover  { color: var(--clr-on-surface-var); background: color-mix(in srgb, var(--clr-on-surface) 6%, transparent); }
+    .drag-handle:active { cursor: grabbing; }
+    .list-item.dragging {
+      background: var(--clr-surface-1); box-shadow: var(--shadow-3);
+      border-radius: var(--r-md); opacity: .96;
+    }
+
+    /* =====================================================
+       TOAST -- desfazer ação (undo)
+    ===================================================== */
+    .toast {
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      opacity: 0; pointer-events: none;
+      background: var(--clr-on-surface); color: var(--clr-surface);
+      border-radius: var(--r-full); box-shadow: var(--shadow-3);
+      padding: 10px 10px 10px 20px;
+      display: flex; align-items: center; gap: 14px;
+      z-index: 400; max-width: calc(100vw - 32px); white-space: nowrap;
+      transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+    }
+    [data-theme="dark"] .toast { background: var(--clr-on-surface); color: var(--clr-surface); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; }
+    .toast-msg { font-size: 13.5px; font-weight: 500; }
+    .toast-undo {
+      background: transparent; border: none; color: var(--clr-primary-container);
+      font-size: 13px; font-weight: 800; letter-spacing: .3px;
+      padding: 8px 12px; border-radius: var(--r-full); flex-shrink: 0;
+    }
+    [data-theme="dark"] .toast-undo { color: var(--clr-primary); }
+    .toast-undo:hover { background: color-mix(in srgb, var(--clr-surface) 15%, transparent); }
+
+    /* =====================================================
+       ABA 3 -- HISTÓRICO DE COMPRAS
+    ===================================================== */
+    .hist-card {
+      margin-bottom: 12px; padding: 16px; border-radius: var(--r-lg);
+      background: var(--clr-surface); border: 1px solid var(--clr-outline-var);
+      box-shadow: var(--shadow-1);
+    }
+    .hist-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+    .hist-date { font-size: 13px; font-weight: 700; color: var(--clr-on-surface); }
+    .hist-total { font-family: var(--font-mono); font-size: 17px; font-weight: 800; color: var(--clr-primary); }
+    [data-theme="dark"] .hist-total { color: var(--clr-primary); }
+    .hist-count { font-size: 11.5px; color: var(--clr-on-surface-var); margin-bottom: 12px; }
+    .hist-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .hist-bar-label { font-size: 11.5px; color: var(--clr-on-surface-var); width: 92px; flex-shrink: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-bar-track { flex: 1; height: 8px; border-radius: var(--r-full); background: var(--clr-surface-1); overflow: hidden; }
+    .hist-bar-fill  { height: 100%; border-radius: var(--r-full); }
+    .hist-bar-val { font-family: var(--font-mono); font-size: 11.5px; color: var(--clr-on-surface-var); width: 62px; text-align: right; flex-shrink: 0; }
+    .hist-summary {
+      display: flex; gap: 10px; margin-bottom: 16px;
+    }
+    .hist-summary-card {
+      flex: 1; padding: 14px; border-radius: var(--r-lg);
+      background: var(--clr-primary-container); color: var(--clr-on-primary-container);
+      text-align: center;
+    }
+    .hist-summary-num { font-family: var(--font-mono); font-size: 20px; font-weight: 800; display: block; }
+    .hist-summary-lbl { font-size: 10.5px; font-weight: 600; opacity: .8; margin-top: 2px; }
+
+    /* =====================================================
+       AUTOCOMPLETE (datalist nativo -- sem estilo custom possível,
+       mas garantimos que o input aceite a lista)
+    ===================================================== */
+
+    /* =====================================================
+       UTILITÁRIOS
+    ===================================================== */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       TOP APP BAR
+  ============================================== -->
+  <header class="app-bar">
+    <span style="font-size:22px;line-height:1;flex-shrink:0" aria-hidden="true">🛒</span>
+    <h1 class="app-bar-title">Lista de Compras</h1>
+
+    <button class="icon-btn" id="btnTheme" title="Alternar tema" aria-label="Alternar tema">
+      <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93ZM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121Zm2.121-14.85 1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121ZM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/>
+      </svg>
+      <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+        <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7Zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12Z"/>
+      </svg>
+    </button>
+
+    <button class="icon-btn" id="btnExport" title="Exportar lista (backup)" aria-label="Exportar lista como arquivo">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 16 6 10l1.41-1.41L11 12.17V2h2v10.17l3.59-3.58L18 10l-6 6Zm-7 4v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
+      </svg>
+    </button>
+
+    <button class="icon-btn" id="btnImport" title="Importar lista (backup)" aria-label="Importar lista de um arquivo">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+        <path d="m12 4 6 6-1.41 1.41L13 7.83V18h-2V7.83L7.41 11.4 6 10l6-6Zm-7 16v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
+      </svg>
+    </button>
+    <input type="file" id="importFile" accept="application/json,.json" class="hidden" aria-hidden="true"/>
+
+    <button class="icon-btn" id="btnClearAll" title="Limpar lista" aria-label="Limpar toda a lista">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5ZM6 6v14h12V6H6Zm3 3h2v8H9V9Zm4 0h2v8h-2V9Z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- =============================================
+       NAVIGATION TABS
+  ============================================== -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" id="tabLista" role="tab" aria-selected="true" aria-controls="viewLista">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M8 4h13v2H8V4ZM4.5 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 6.9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3ZM8 11h13v2H8v-2Zm0 7h13v2H8v-2Z"/>
+      </svg>
+      Criando a Lista
+    </button>
+    <button class="nav-tab" id="tabCompras" role="tab" aria-selected="false" aria-controls="viewCompras">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M4 16V4H2V2h3a1 1 0 0 1 1 1v12h12.438l2-8H8V5h13.72a1 1 0 0 1 .97 1.243l-2.5 10a1 1 0 0 1-.97.757H5a1 1 0 0 1-1-1Zm2 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm12 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+      </svg>
+      Hora das Compras
+    </button>
+    <button class="nav-tab" id="tabHistorico" role="tab" aria-selected="false" aria-controls="viewHistorico">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3Zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12Z"/>
+      </svg>
+      Histórico
+    </button>
+  </nav>
+
+  <!-- =============================================
+       CONTEÚDO PRINCIPAL
+  ============================================== -->
+  <main class="main" id="mainScroll">
+
+    <!-- VIEW 1: Criando a Lista -->
+    <div class="view active" id="viewLista" role="tabpanel" aria-labelledby="tabLista">
+      <div class="inner">
+        <div class="quick-add-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
+               style="color:var(--clr-outline);flex-shrink:0" aria-hidden="true">
+            <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
+          </svg>
+          <input class="quick-add-input" id="quickInput" type="text"
+            placeholder="Adicionar item... (Enter para confirmar)"
+            autocomplete="off" autocorrect="off" enterkeyhint="done"
+            list="itemSuggestions"
+            aria-label="Adicionar novo item"/>
+          <!-- Sugestões de autocomplete geradas a partir do histórico de itens já usados -->
+          <datalist id="itemSuggestions"></datalist>
+        </div>
+        <!-- Container de grupos de categoria (preenchido via JS) -->
+        <div id="listaContainer"></div>
+        <button class="add-item-row" id="addItemRowBtn" aria-label="Adicionar novo item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
+          </svg>
+          Adicionar novo item
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 2: Hora das Compras -->
+    <div class="view" id="viewCompras" role="tabpanel" aria-labelledby="tabCompras">
+      <div class="inner" id="comprasContainer"></div>
+    </div>
+
+    <!-- VIEW 3: Histórico de Compras -->
+    <div class="view" id="viewHistorico" role="tabpanel" aria-labelledby="tabHistorico">
+      <div class="inner" id="historicoContainer"></div>
+    </div>
+
+  </main>
+
+  <!-- =============================================
+       TOAST -- Desfazer última ação
+  ============================================== -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-msg" id="toastMsg"></span>
+    <button class="toast-undo" id="toastUndoBtn">Desfazer</button>
+  </div>
+
+  <!-- =============================================
+       ACTION BAR FLUTUANTE (seleção em massa)
+  ============================================== -->
+  <div class="action-bar" id="actionBar" role="toolbar" aria-label="Ações para itens selecionados">
+    <span class="action-bar-label" id="actionBarLabel">0 selecionados</span>
+    <button class="btn btn-filled" id="btnCategorize" aria-label="Adicionar à categoria">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20 3H4a1 1 0 0 0-1 1v2.59c0 .52.21 1.04.59 1.41L10 14.41V21a1 1 0 0 0 .55.89l4 2A1 1 0 0 0 16 23v-8.59l6.41-6.41c.38-.37.59-.89.59-1.41V4a1 1 0 0 0-1-1Z"/>
+      </svg>
+      Categorizar
+    </button>
+    <button class="btn btn-danger" id="btnDeleteSel" aria-label="Excluir selecionados">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5Z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- =============================================
+       FOOTER -- TOTAL GERAL (só visível na Aba 2)
+  ============================================== -->
+  <div class="footer-rail hidden" id="footerRail">
+    <div class="footer-inner">
+      <div class="footer-meta">
+        <span class="footer-label">Total da compra</span>
+        <span class="footer-count" id="footerCount"></span>
+      </div>
+      <span class="footer-total" id="footerTotal">R$ 0,00</span>
+    </div>
+  </div>
+
+  <!-- =============================================
+       MODAL: Escolher / Criar Categoria
+  ============================================== -->
+  <div class="overlay" id="overlayCategoria" role="dialog" aria-modal="true" aria-label="Adicionar à categoria">
+    <div class="bottom-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2 class="sheet-title">Adicionar à categoria</h2>
+
+      <!-- Lista de categorias existentes (preenchida via JS) -->
+      <div class="modal-cat-list" id="modalCatList"></div>
+
+      <button class="btn btn-tonal" id="btnNewCat"
+              style="width:100%;justify-content:center;margin-bottom:12px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
+        </svg>
+        Nova categoria
+      </button>
+
+      <!-- Formulário de nova categoria (oculto por padrão) -->
+      <div class="new-cat-section" id="newCatSection">
+        <input class="new-cat-input" id="newCatInput" type="text"
+               placeholder="Nome da nova categoria..."
+               autocomplete="off" enterkeyhint="done"/>
+
+        <div class="color-picker-label">Cor da categoria</div>
+
+        <!-- Bolinhas de cores pré-definidas -->
+        <div class="color-swatches" id="colorSwatches"></div>
+
+        <!-- Cor personalizada via input nativo -->
+        <div class="custom-color-row">
+          <label for="customColorInput">Personalizada:</label>
+          <input type="color" class="custom-color-input" id="customColorInput" value="#006A60"/>
+        </div>
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn btn-text" id="btnModalCancel">Cancelar</button>
+        <button class="btn btn-filled" id="btnModalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       MODAL: Confirmar limpeza total
+  ============================================== -->
+  <div class="overlay" id="overlayConfirm" role="dialog" aria-modal="true" aria-label="Confirmar limpeza">
+    <div class="bottom-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2 class="sheet-title">Limpar toda a lista?</h2>
+      <p style="font-size:14px;color:var(--clr-on-surface-var);line-height:1.65;margin-bottom:20px">
+        Todos os itens serão removidos e as categorias voltarão ao padrão
+        (Mercearia, Perecíveis, FLV, DPH). Itens já marcados como comprados
+        são salvos na aba "Histórico" antes de limpar. Você tem alguns
+        segundos pra desfazer depois de confirmar.
+      </p>
+      <div class="sheet-actions">
+        <button class="btn btn-text" id="btnConfirmCancel">Cancelar</button>
+        <button class="btn" id="btnConfirmOk" style="background:var(--clr-error);color:#fff">Limpar tudo</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =============================================
+       JAVASCRIPT -- LÓGICA COMPLETA
+  ============================================== -->
+  <script>
+    /* ==============================================================
+       LISTA DE COMPRAS v2
+       Correção: Delegação de Eventos para reatividade em tempo real.
+       Novo:     Sistema de cores por categoria (CSS Custom Properties).
+
+       CAMADAS:
+       L0 -- Constantes, Paleta de Cores & SVGs
+       L1 -- Estado Global e Tipos (@typedef)
+       L2 -- Persistência (localStorage)
+       L3 -- Utilitários Puros
+       L4 -- Lógica de Negócio (sem DOM)
+       L5 -- Renderização de DOM (re-render estrutural)
+       L6 -- Atualizações Parciais de DOM (sem re-render)
+       L7 -- Modal de Categorias
+       L8 -- Navegação e Tema
+       L9 -- Delegação de Eventos (Event Delegation) ← FIX PRINCIPAL
+       L10 -- Inicialização
+    ============================================================== */
+
+
+    /* ----------------------------------------------------------
+       L0 -- CONSTANTES, PALETA DE CORES E SVGs
+    ---------------------------------------------------------- */
+
+    const STORAGE_KEY = 'compras-v2';
+
+    /** ID reservado para a categoria padrão de itens não-categorizados */
+    const ID_SEM_CAT = '__sem_categoria__';
+
+    /**
+     * Paleta de 10 cores para categorias personalizadas.
+     * Os tons são escolhidos para legibilidade em ambos os temas:
+     * - Light mode: usados diretamente (saturados, sobre fundo claro)
+     * - Dark mode: clareados automaticamente via color-mix() no CSS
+     */
+    const PALETTE = [
+      { color: '#B3261E', label: 'Vermelho'  }, // MERCEARIA
+      { color: '#C75B39', label: 'Laranja'    },
+      { color: '#8B6914', label: 'Âmbar'      },
+      { color: '#386A20', label: 'Verde'      }, // FLV
+      { color: '#006A6A', label: 'Teal'       },
+      { color: '#0061A4', label: 'Azul'       }, // DPH
+      { color: '#7B38D8', label: 'Roxo'       },
+      { color: '#9A0065', label: 'Rosa'       },
+      { color: '#546E7A', label: 'Cinza-azul' }, // PERECÍVEIS
+      { color: '#5D4037', label: 'Marrom'     },
+    ];
+
+    /**
+     * Categorias padrão pré-estabelecidas com identidade visual.
+     * MERCEARIA=Vermelho, PERECÍVEIS=Cinza-azul (branco/neutro),
+     * FLV=Verde, DPH=Azul.
+     * Restauradas ao usar "Limpar tudo".
+     */
+    const CATS_DEFAULT = [
+      { id: ID_SEM_CAT,        name: 'Sem Categoria', collapsed: false, color: '#79747E' },
+      { id: 'cat-mercearia',   name: 'MERCEARIA',     collapsed: false, color: '#B3261E' },
+      { id: 'cat-pereciveis',  name: 'PERECÍVEIS',    collapsed: false, color: '#546E7A' },
+      { id: 'cat-flv',         name: 'FLV',           collapsed: false, color: '#386A20' },
+      { id: 'cat-dph',         name: 'DPH',           collapsed: false, color: '#0061A4' },
+    ];
+
+    /** SVGs inline reutilizáveis (sem dependência externa) */
+    const SVG = {
+      check: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>`,
+      trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5Z"/>
+              </svg>`,
+      arrowUp: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="m12 8-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+                </svg>`,
+      grip: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+               <circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/>
+               <circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/>
+               <circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/>
+             </svg>`,
+    };
+
+
+    /* ----------------------------------------------------------
+       L1 -- ESTADO GLOBAL
+    ---------------------------------------------------------- */
+
+    /**
+     * @typedef {Object} Category
+     * @property {string}  id        - ID único
+     * @property {string}  name      - Nome exibido
+     * @property {boolean} collapsed - Recolhida na Aba 2
+     * @property {string}  color     - Cor hexadecimal (#RRGGBB)
+     */
+
+    /**
+     * @typedef {Object} Item
+     * @property {string}  id         - ID único
+     * @property {string}  name       - Nome do produto
+     * @property {string}  categoryId - ID da categoria-mãe
+     * @property {boolean} selected   - Selecionado para categorização em massa
+     * @property {boolean} done       - Marcado como comprado
+     * @property {number}  qty        - Quantidade
+     * @property {number}  price      - Valor unitário (R$)
+     */
+
+    /**
+     * @typedef {Object} CatalogEntry
+     * @property {string} name       - Nome original (exibido no autocomplete)
+     * @property {string} categoryId - Última categoria usada para esse item
+     * @property {number} count      - Quantas vezes o item já foi adicionado
+     */
+
+    /**
+     * @typedef {Object} PurchaseSnapshot
+     * @property {string} id
+     * @property {string} date        - ISO string do momento em que a compra foi finalizada
+     * @property {number} total
+     * @property {number} count       - Nº de itens comprados nessa compra
+     * @property {{name:string, color:string, total:number}[]} categories
+     */
+
+    /** @type {{ items: Item[], categories: Category[], view: string, theme: string,
+                 catalog: Object<string, CatalogEntry>, purchaseHistory: PurchaseSnapshot[] }} */
+    let state = {
+      items:           [],
+      categories:      CATS_DEFAULT.map(c => ({ ...c })),
+      view:            'lista',
+      theme:           'light',
+      catalog:         {},   // chave: nome do item em minúsculas
+      purchaseHistory: [],
+    };
+
+
+    /* ----------------------------------------------------------
+       L2 -- PERSISTÊNCIA (localStorage)
+    ---------------------------------------------------------- */
+
+    /** Carrega o estado salvo. Aplica migrações de compatibilidade. */
+    function carregarEstado() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        state = { ...state, ...saved };
+        // Migração: categorias antigas sem campo "color" recebem fallback
+        state.categories = state.categories.map(c => ({ color: '#79747E', ...c }));
+        // Garante que a categoria padrão sempre existe
+        if (!state.categories.find(c => c.id === ID_SEM_CAT)) {
+          state.categories.unshift({ ...CATS_DEFAULT[0] });
+        }
+        // Migração: instalações antigas não tinham catálogo nem histórico
+        if (!state.catalog || typeof state.catalog !== 'object') state.catalog = {};
+        if (!Array.isArray(state.purchaseHistory)) state.purchaseHistory = [];
+      } catch (e) {
+        console.warn('[compras] Falha ao carregar estado:', e);
+      }
+    }
+
+    /** Persiste o estado atual no localStorage. */
+    function salvarEstado() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('[compras] Falha ao salvar estado:', e);
+      }
+    }
+
+
+    /* ----------------------------------------------------------
+       L2b -- EXPORTAR / IMPORTAR (backup manual / sincronização
+       entre aparelhos, já que tudo vive no localStorage do device)
+    ---------------------------------------------------------- */
+
+    /** Gera um arquivo .json com o estado inteiro e dispara o download. */
+    function exportarDados() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const hoje = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `lista-de-compras-${hoje}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    /** Lê um arquivo .json exportado anteriormente e substitui o estado atual. */
+    function importarDados(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const dados = JSON.parse(reader.result);
+          if (!Array.isArray(dados.items) || !Array.isArray(dados.categories)) {
+            throw new Error('Formato inválido');
+          }
+          if (!confirm('Importar este arquivo vai substituir a lista, categorias e histórico atuais. Continuar?')) return;
+
+          state = {
+            items:           dados.items,
+            categories:      dados.categories,
+            view:            state.view,
+            theme:           state.theme,
+            catalog:         (dados.catalog && typeof dados.catalog === 'object') ? dados.catalog : {},
+            purchaseHistory: Array.isArray(dados.purchaseHistory) ? dados.purchaseHistory : [],
+          };
+          salvarEstado();
+          renderizarTudo();
+          mudarView(state.view || 'lista');
+        } catch (e) {
+          alert('Não foi possível importar este arquivo. Verifique se é um backup exportado pelo próprio app.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+
+    /* ----------------------------------------------------------
+       L3 -- UTILITÁRIOS PUROS
+    ---------------------------------------------------------- */
+
+    /** Gera ID único alfanumérico */
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    /** Formata número como moeda BRL */
+    const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    /** Escapa caracteres HTML para evitar XSS */
+    const esc = s => String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+    /** Parseia string numérica, aceitando vírgula ou ponto como decimal */
+    const parseNum = v => Math.max(0, parseFloat(String(v).replace(',', '.')) || 0);
+
+
+    /* ----------------------------------------------------------
+       L4 -- LÓGICA DE NEGÓCIO (pura, sem efeitos no DOM)
+    ---------------------------------------------------------- */
+
+    const itensDa    = id => state.items.filter(i => i.categoryId === id);
+    const subtotalDa = id => itensDa(id).reduce((s, i) => s + i.qty * i.price, 0);
+    const totalGeral = ()  => state.items.reduce((s, i) => s + i.qty * i.price, 0);
+    const catCompleta = id => { const its = itensDa(id); return its.length > 0 && its.every(i => i.done); };
+    const catsComItens = () => state.categories.filter(c => itensDa(c.id).length > 0);
+    const itensSel   = ()  => state.items.filter(i => i.selected);
+
+    /**
+     * Adiciona um item novo. Se o nome já apareceu antes (catálogo de
+     * histórico), a categoria usada da última vez é aplicada automaticamente
+     * -- em vez de cair sempre em "Sem Categoria".
+     */
+    function adicionarItem(nome) {
+      nome = nome.trim();
+      if (!nome) return false;
+      const chave = nome.toLowerCase();
+      const conhecido = state.catalog[chave];
+      const categoryId = conhecido && state.categories.find(c => c.id === conhecido.categoryId)
+        ? conhecido.categoryId : ID_SEM_CAT;
+      state.items.push({ id: uid(), name: nome, categoryId,
+                          selected: false, done: false, qty: 1, price: 0 });
+      atualizarCatalogo(nome, categoryId);
+      salvarEstado();
+      return true;
+    }
+
+    function removerItem(id)       { state.items = state.items.filter(i => i.id !== id); salvarEstado(); }
+    function removerSelecionados() { state.items = state.items.filter(i => !i.selected); salvarEstado(); }
+
+    function toggleSelecionado(id) {
+      const item = state.items.find(i => i.id === id);
+      if (item) { item.selected = !item.selected; salvarEstado(); }
+    }
+
+    function toggleConcluido(id) {
+      const item = state.items.find(i => i.id === id);
+      if (item) { item.done = !item.done; salvarEstado(); }
+    }
+
+    function setQty(id, v)   { const i = state.items.find(x => x.id === id); if (i) { i.qty   = parseNum(v); salvarEstado(); } }
+    function setPrice(id, v) { const i = state.items.find(x => x.id === id); if (i) { i.price = parseNum(v); salvarEstado(); } }
+
+    function moverParaCategoria(catId) {
+      state.items.forEach(i => {
+        if (i.selected) {
+          i.categoryId = catId; i.selected = false;
+          atualizarCatalogo(i.name, catId); // aprende a categoria pra próxima vez
+        }
+      });
+      salvarEstado();
+    }
+
+    /** Registra/atualiza um item no catálogo de histórico (usado pelo autocomplete). */
+    function atualizarCatalogo(nome, categoryId) {
+      const chave = nome.toLowerCase();
+      const atual = state.catalog[chave];
+      state.catalog[chave] = {
+        name: nome,
+        categoryId,
+        count: (atual?.count || 0) + 1,
+      };
+    }
+
+    /** Lista de nomes do catálogo ordenada por frequência de uso (mais usados primeiro). */
+    function sugestoesOrdenadas(limite = 40) {
+      return Object.values(state.catalog)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limite)
+        .map(e => e.name);
+    }
+
+    /**
+     * Reordena os itens de UMA categoria conforme a nova ordem de IDs
+     * (vinda do drag-and-drop). A posição relativa entre categorias
+     * diferentes não importa pro layout, que já agrupa por categoria.
+     */
+    function reordenarCategoria(catId, novaOrdemIds) {
+      const doCat  = novaOrdemIds
+        .map(id => state.items.find(i => i.id === id && i.categoryId === catId))
+        .filter(Boolean);
+      const outros = state.items.filter(i => i.categoryId !== catId);
+      state.items = [...outros, ...doCat];
+      salvarEstado();
+    }
+
+    function criarCategoria(nome, color) {
+      nome = nome.trim();
+      if (!nome) return null;
+      const nova = { id: uid(), name: nome, collapsed: false, color: color || PALETTE[0].color };
+      state.categories.push(nova);
+      salvarEstado();
+      return nova.id;
+    }
+
+    function toggleColapso(catId) {
+      const cat = state.categories.find(c => c.id === catId);
+      if (cat) { cat.collapsed = !cat.collapsed; salvarEstado(); }
+    }
+
+    /**
+     * Gera um snapshot da compra atual (total + divisão por categoria) e
+     * salva no histórico -- só quando há algo efetivamente comprado (done).
+     * Chamado automaticamente por limparTudo().
+     */
+    function registrarCompraNoHistorico() {
+      const comprados = state.items.filter(i => i.done && i.qty * i.price > 0);
+      if (comprados.length === 0) return;
+
+      const porCategoria = {};
+      comprados.forEach(i => {
+        porCategoria[i.categoryId] = (porCategoria[i.categoryId] || 0) + i.qty * i.price;
+      });
+
+      const categorias = Object.entries(porCategoria)
+        .map(([catId, total]) => {
+          const cat = state.categories.find(c => c.id === catId);
+          return { name: cat ? cat.name : 'Sem Categoria', color: cat ? cat.color : '#79747E', total };
+        })
+        .sort((a, b) => b.total - a.total);
+
+      state.purchaseHistory.unshift({
+        id:    uid(),
+        date:  new Date().toISOString(),
+        total: comprados.reduce((s, i) => s + i.qty * i.price, 0),
+        count: comprados.length,
+        categories: categorias,
+      });
+      // Mantém no máximo as 60 compras mais recentes
+      state.purchaseHistory = state.purchaseHistory.slice(0, 60);
+    }
+
+    function limparTudo() {
+      registrarCompraNoHistorico();
+      state.items = [];
+      state.categories = CATS_DEFAULT.map(c => ({ ...c }));
+      salvarEstado();
+    }
+
+
+    /* ----------------------------------------------------------
+       L5 -- RENDERIZAÇÃO DE DOM
+       Funções de re-render completo. Chamadas após mudanças
+       ESTRUTURAIS: item adicionado/removido, categorizado,
+       categoria criada, ou troca de view.
+    ---------------------------------------------------------- */
+
+    /**
+     * Gera o atributo style="--cat-clr:#{color}" para o .cat-group.
+     * Essa CSS Custom Property é herdada por todos os filhos coloridos
+     * (label, seta, subtotal, total de item) via regras no <style>.
+     */
+    const catStyle = color => `style="--cat-clr:${color}"`;
+
+    /** Renderiza a Aba 1 -- "Criando a Lista" */
+    function renderizarLista() {
+      const container = document.getElementById('listaContainer');
+      const parts = [];
+
+      state.categories.forEach(cat => {
+        const itens = itensDa(cat.id);
+        // Oculta categorias extras vazias (a "Sem Categoria" fica sempre visível)
+        if (itens.length === 0 && cat.id !== ID_SEM_CAT) return;
+
+        parts.push(`
+          <div class="cat-group" data-cat="${cat.id}" ${catStyle(cat.color)}>
+
+            <!-- Cabeçalho fixo (não clicável na Aba 1) -->
+            <div class="cat-header">
+              <span class="cat-label">${esc(cat.name)}</span>
+              <span class="cat-count">${itens.length} ${itens.length === 1 ? 'item' : 'itens'}</span>
+            </div>
+
+            <div class="cat-body-wrap"><div class="cat-body-inner">
+              ${itens.length === 0
+                ? `<div style="padding:20px 16px;text-align:center;color:var(--clr-outline);font-size:13px">
+                     Nenhum item ainda -- adicione no campo acima!
+                   </div>`
+                : itens.map(item => `
+                    <div class="list-item" data-item="${item.id}">
+                      <!-- Alça de arrastar: pointerdown inicia a reordenação (ver L6b) -->
+                      <div class="drag-handle" data-drag-handle aria-hidden="true">${SVG.grip}</div>
+                      <!-- Checkbox de seleção em massa.
+                           data-action e data-id capturados pela delegação de eventos. -->
+                      <div class="chk ${item.selected ? 'sel' : ''}"
+                           data-action="sel" data-id="${item.id}"
+                           role="checkbox" aria-checked="${item.selected}" tabindex="0"
+                           aria-label="Selecionar ${esc(item.name)}">
+                        ${item.selected ? SVG.check : ''}
+                      </div>
+                      <span class="item-name">${esc(item.name)}</span>
+                      <button class="icon-btn"
+                              style="width:32px;height:32px;color:var(--clr-outline)"
+                              data-action="del" data-id="${item.id}"
+                              aria-label="Remover ${esc(item.name)}">
+                        ${SVG.trash}
+                      </button>
+                    </div>
+                  `).join('')
+              }
+            </div></div>
+          </div>
+        `);
+      });
+
+      container.innerHTML = parts.join('');
+      renderizarSugestoes();
+    }
+
+    /** Preenche o <datalist> de autocomplete com os itens mais usados no histórico. */
+    function renderizarSugestoes() {
+      const dl = document.getElementById('itemSuggestions');
+      if (!dl) return;
+      dl.innerHTML = sugestoesOrdenadas().map(nome => `<option value="${esc(nome)}"></option>`).join('');
+    }
+
+    /** Renderiza a Aba 2 -- "Hora das Compras" */
+    function renderizarCompras() {
+      const container = document.getElementById('comprasContainer');
+      const cats = catsComItens();
+
+      if (cats.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-emoji">🛍️</div>
+            <div class="empty-title">Nenhum item na lista</div>
+            <div class="empty-body">Vá para "Criando a Lista" e<br/>adicione seus produtos!</div>
+          </div>`;
+        document.getElementById('footerRail').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('footerRail').classList.remove('hidden');
+
+      container.innerHTML = cats.map(cat => {
+        const itens    = itensDa(cat.id);
+        const completa = catCompleta(cat.id);
+        const colaps   = cat.collapsed;
+
+        return `
+          <div class="cat-group ${colaps ? 'collapsed' : ''}"
+               data-cat="${cat.id}" ${catStyle(cat.color)}>
+
+            <!-- Header clicável (acordeão).
+                 data-action="collapse" capturado pela delegação de eventos. -->
+            <div class="cat-header"
+                 data-action="collapse" data-id="${cat.id}"
+                 role="button" tabindex="0"
+                 aria-expanded="${!colaps}"
+                 aria-label="${colaps ? 'Expandir' : 'Recolher'} ${esc(cat.name)}">
+
+              <span class="cat-label">${esc(cat.name)}</span>
+
+              <!-- Badge ✓ verde: só aparece quando categoria concluída E recolhida -->
+              <span class="cat-done-badge ${completa && colaps ? 'show' : ''}"
+                    title="Todos os itens comprados">${SVG.check}</span>
+
+              <!-- Seta: rotaciona 180° via CSS quando .collapsed está no .cat-group -->
+              <span class="cat-arrow" aria-hidden="true">${SVG.arrowUp}</span>
+            </div>
+
+            <!-- Corpo expansível via grid-template-rows (animação suave) -->
+            <div class="cat-body-wrap"><div class="cat-body-inner">
+
+              ${itens.map(item => {
+                const total = item.qty * item.price;
+                return `
+                  <div class="list-item" data-item="${item.id}">
+
+                    <!-- Alça de arrastar: pointerdown inicia a reordenação (ver L6b) -->
+                    <div class="drag-handle" data-drag-handle aria-hidden="true">${SVG.grip}</div>
+
+                    <!-- Checkbox de conclusão: data-action="done" capturado pela delegação.
+                         Após o clique, renderizarCompras() é chamado e a view é atualizada. -->
+                    <div class="chk ${item.done ? 'done' : ''}"
+                         data-action="done" data-id="${item.id}"
+                         role="checkbox" aria-checked="${item.done}" tabindex="0"
+                         title="${item.done ? 'Desmarcar' : 'Marcar como comprado'}">
+                      ${item.done ? SVG.check : ''}
+                    </div>
+
+                    <span class="item-name ${item.done ? 'done' : ''}">${esc(item.name)}</span>
+
+                    <div class="item-inputs">
+                      <div class="input-group">
+                        <label>Qtd</label>
+                        <!-- data-action="qty" capturado no evento "input" pela delegação -->
+                        <input class="num-input input-qty"
+                               type="number" min="0" step="1"
+                               value="${item.qty}" inputmode="decimal"
+                               data-action="qty" data-id="${item.id}"
+                               aria-label="Quantidade de ${esc(item.name)}"/>
+                      </div>
+                      <div class="input-group">
+                        <label>Unit. R$</label>
+                        <!-- data-action="price" capturado no evento "input" pela delegação -->
+                        <input class="num-input input-price"
+                               type="number" min="0" step="0.01"
+                               value="${item.price > 0 ? item.price.toFixed(2) : ''}"
+                               placeholder="0,00" inputmode="decimal"
+                               data-action="price" data-id="${item.id}"
+                               aria-label="Preço de ${esc(item.name)}"/>
+                      </div>
+                      <div class="item-total-cell">
+                        <!-- data-itotal: atualizado por atualizarTotaisDom() sem re-render -->
+                        <span class="item-total-val" data-itotal="${item.id}">
+                          ${total > 0 ? brl(total) : '--'}
+                        </span>
+                        <span class="item-total-label">Total</span>
+                      </div>
+                    </div>
+
+                  </div>
+                `;
+              }).join('')}
+
+              <!-- Subtotal da categoria.
+                   data-sub: atualizado por atualizarTotaisDom() sem re-render -->
+              <div class="cat-subtotal">
+                <span class="cat-subtotal-label">Subtotal ${esc(cat.name)}</span>
+                <span class="cat-subtotal-val" data-sub="${cat.id}">${brl(subtotalDa(cat.id))}</span>
+              </div>
+
+            </div></div>
+          </div>
+        `;
+      }).join('');
+
+      atualizarFooter();
+    }
+
+    /** Formata um ISO date pro padrão "dd/mm/aaaa às HH:MM" */
+    function formatarDataHist(iso) {
+      const d = new Date(iso);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}/${d.getFullYear()} às ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    /** Renderiza a Aba 3 -- "Histórico" de compras finalizadas */
+    function renderizarHistorico() {
+      const container = document.getElementById('historicoContainer');
+      const hist = state.purchaseHistory;
+
+      if (hist.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-emoji">📊</div>
+            <div class="empty-title">Nenhuma compra no histórico</div>
+            <div class="empty-body">Quando você finalizar uma compra<br/>(marcar itens e usar "Limpar lista"),<br/>ela aparece aqui.</div>
+          </div>`;
+        return;
+      }
+
+      const totalGeralHist = hist.reduce((s, h) => s + h.total, 0);
+      const mediaHist = totalGeralHist / hist.length;
+
+      const resumo = `
+        <div class="hist-summary">
+          <div class="hist-summary-card">
+            <span class="hist-summary-num">${brl(totalGeralHist)}</span>
+            <span class="hist-summary-lbl">TOTAL GASTO</span>
+          </div>
+          <div class="hist-summary-card">
+            <span class="hist-summary-num">${brl(mediaHist)}</span>
+            <span class="hist-summary-lbl">MÉDIA POR COMPRA</span>
+          </div>
+          <div class="hist-summary-card">
+            <span class="hist-summary-num">${hist.length}</span>
+            <span class="hist-summary-lbl">${hist.length === 1 ? 'COMPRA' : 'COMPRAS'}</span>
+          </div>
+        </div>`;
+
+      const cards = hist.map(h => `
+        <div class="hist-card">
+          <div class="hist-head">
+            <span class="hist-date">${formatarDataHist(h.date)}</span>
+            <span class="hist-total">${brl(h.total)}</span>
+          </div>
+          <div class="hist-count">${h.count} ${h.count === 1 ? 'item comprado' : 'itens comprados'}</div>
+          ${h.categories.map(c => `
+            <div class="hist-bar-row">
+              <span class="hist-bar-label" title="${esc(c.name)}">${esc(c.name)}</span>
+              <div class="hist-bar-track">
+                <div class="hist-bar-fill" style="width:${h.total > 0 ? (c.total / h.total * 100) : 0}%;background:${c.color}"></div>
+              </div>
+              <span class="hist-bar-val">${brl(c.total)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+
+      container.innerHTML = resumo + cards;
+    }
+
+    /**
+     * Re-renderiza ambas as views.
+     * Chamar após mudanças ESTRUTURAIS (add/remove item, categorização, etc.).
+     */
+    function renderizarTudo() {
+      renderizarLista();
+      if (state.view === 'compras') renderizarCompras();
+      if (state.view === 'historico') renderizarHistorico();
+      atualizarActionBar();
+    }
+
+
+    /* ----------------------------------------------------------
+       L6 -- ATUALIZAÇÕES PARCIAIS DE DOM
+       Não fazem re-render completo: preservam foco em inputs
+       e evitam piscadas de tela. Usadas para:
+       - Toggle done/undone (sem re-render da lista)
+       - Recalculo de totais após qty/price change
+       - Atualização do badge de categoria concluída
+    ---------------------------------------------------------- */
+
+    /**
+     * Recalcula e atualiza NO DOM os valores monetários:
+     * total por item (data-itotal), subtotal por categoria (data-sub)
+     * e o total geral no rodapé.
+     * Chamada após alteração de qty ou price -- o input mantém o foco.
+     */
+    function atualizarTotaisDom() {
+      state.items.forEach(item => {
+        const el = document.querySelector(`[data-itotal="${item.id}"]`);
+        if (el) el.textContent = item.qty * item.price > 0 ? brl(item.qty * item.price) : '--';
+      });
+      state.categories.forEach(cat => {
+        const el = document.querySelector(`[data-sub="${cat.id}"]`);
+        if (el) el.textContent = brl(subtotalDa(cat.id));
+      });
+      atualizarFooter();
+    }
+
+    /** Atualiza o rodapé com total geral e contagem de progresso */
+    function atualizarFooter() {
+      const elTotal = document.getElementById('footerTotal');
+      const elCount = document.getElementById('footerCount');
+      if (elTotal) elTotal.textContent = brl(totalGeral());
+      if (elCount) {
+        const done = state.items.filter(i => i.done).length;
+        const tot  = state.items.length;
+        elCount.textContent = `${done} de ${tot} ${tot === 1 ? 'item comprado' : 'itens comprados'}`;
+      }
+    }
+
+    /** Atualiza a action bar de seleção em massa */
+    function atualizarActionBar() {
+      const sel  = itensSel();
+      const bar  = document.getElementById('actionBar');
+      const lbl  = document.getElementById('actionBarLabel');
+      const show = sel.length > 0 && state.view === 'lista';
+      bar.classList.toggle('show', show);
+      if (show) {
+        lbl.textContent = `${sel.length} ${sel.length === 1 ? 'item selecionado' : 'itens selecionados'}`;
+      }
+    }
+
+
+    /* ----------------------------------------------------------
+       L6b -- TOAST DE DESFAZER (UNDO)
+       Ações destrutivas (remover item, remover selecionados, limpar
+       tudo) guardam um snapshot do estado ANTES de mutar. O toast
+       fica visível por alguns segundos com um botão "Desfazer" que
+       restaura o snapshot. Passado o tempo, o snapshot é descartado.
+    ---------------------------------------------------------- */
+
+    let undoSnapshot = null;   // { items, categories, purchaseHistory } antes da ação
+    let undoTimer = null;
+
+    /** Mostra o toast com uma ação de desfazer disponível por `ms` milissegundos. */
+    function mostrarUndo(mensagem, snapshot, ms = 5000) {
+      undoSnapshot = snapshot;
+      clearTimeout(undoTimer);
+
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = mensagem;
+      toast.classList.add('show');
+
+      undoTimer = setTimeout(esconderUndo, ms);
+    }
+
+    function esconderUndo() {
+      document.getElementById('toast').classList.remove('show');
+      undoSnapshot = null;
+      clearTimeout(undoTimer);
+    }
+
+    function executarUndo() {
+      if (!undoSnapshot) return;
+      state.items           = undoSnapshot.items;
+      state.categories      = undoSnapshot.categories;
+      state.purchaseHistory = undoSnapshot.purchaseHistory;
+      salvarEstado();
+      esconderUndo();
+      renderizarTudo();
+    }
+
+    /** Clona só os campos que ações destrutivas podem alterar. */
+    const snapshotAtual = () => ({
+      items:           JSON.parse(JSON.stringify(state.items)),
+      categories:      JSON.parse(JSON.stringify(state.categories)),
+      purchaseHistory: JSON.parse(JSON.stringify(state.purchaseHistory)),
+    });
+
+
+    /* ----------------------------------------------------------
+       L7 -- MODAL DE CATEGORIAS
+    ---------------------------------------------------------- */
+
+    let modalCatId = null;         // categoria existente selecionada no modal
+    let modalColor = PALETTE[0].color; // cor selecionada para nova categoria
+
+    const abrirOverlay  = id => { document.getElementById(id).classList.add('open');    document.body.style.overflow = 'hidden'; };
+    const fecharOverlay = id => { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; };
+
+    /** Renderiza as bolinhas de cor no modal e inicializa a seleção */
+    function renderizarSwatches() {
+      modalColor = PALETTE[0].color;
+      document.getElementById('colorSwatches').innerHTML = PALETTE.map((p, i) => `
+        <div class="color-swatch ${i === 0 ? 'active' : ''}"
+             style="background:${p.color}"
+             data-color="${p.color}"
+             title="${p.label}"
+             role="radio" aria-label="${p.label}" aria-checked="${i === 0}" tabindex="0">
+        </div>
+      `).join('');
+      document.getElementById('customColorInput').value = modalColor;
+    }
+
+    /** Marca uma swatch como ativa e atualiza modalColor */
+    function selecionarSwatch(color, swatchEl) {
+      modalColor = color;
+      document.getElementById('customColorInput').value = color;
+      document.querySelectorAll('.color-swatch').forEach(el => {
+        const ativo = el === swatchEl;
+        el.classList.toggle('active', ativo);
+        el.setAttribute('aria-checked', ativo);
+      });
+    }
+
+    /** Abre o modal e preenche a lista de categorias com bolinhas coloridas */
+    function abrirModalCategoria() {
+      modalCatId = null;
+
+      document.getElementById('modalCatList').innerHTML = state.categories.map(cat => `
+        <div class="modal-cat-item" data-mcat="${cat.id}"
+             role="radio" aria-checked="false" tabindex="0">
+          <span class="cat-color-dot" style="background:${cat.color}"></span>
+          <span style="flex:1">${esc(cat.name)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('newCatSection').classList.remove('visible');
+      document.getElementById('newCatInput').value = '';
+      renderizarSwatches();
+      abrirOverlay('overlayCategoria');
+    }
+
+
+    /* ----------------------------------------------------------
+       L8 -- NAVEGAÇÃO E TEMA
+    ---------------------------------------------------------- */
+
+    /** Muda a view ativa entre 'lista', 'compras' e 'historico' */
+    function mudarView(view) {
+      state.view = view;
+      salvarEstado();
+
+      ['Lista', 'Compras', 'Historico'].forEach(nome => {
+        const key = nome.toLowerCase();
+        document.getElementById(`tab${nome}`) .classList.toggle('active', view === key);
+        document.getElementById(`tab${nome}`) .setAttribute('aria-selected', view === key);
+        document.getElementById(`view${nome}`).classList.toggle('active', view === key);
+      });
+
+      const temItens = state.items.length > 0;
+      document.getElementById('footerRail').classList.toggle('hidden', view !== 'compras' || !temItens);
+
+      if (view !== 'lista') document.getElementById('actionBar').classList.remove('show');
+
+      if (view === 'compras')        renderizarCompras();
+      else if (view === 'historico') renderizarHistorico();
+      else                            renderizarLista();
+    }
+
+    /** Aplica o tema (light/dark) ao document */
+    function aplicarTema() {
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.getElementById('iconSun') .classList.toggle('hidden', state.theme === 'dark');
+      document.getElementById('iconMoon').classList.toggle('hidden', state.theme === 'light');
+      // Cor da barra de status do sistema (Android/iOS) acompanha o tema
+      const meta = document.getElementById('themeColorMeta');
+      if (meta) meta.setAttribute('content', state.theme === 'dark' ? '#191C1C' : '#006A60');
+    }
+
+
+    /* ----------------------------------------------------------
+       L9 -- DELEGAÇÃO DE EVENTOS (Event Delegation)
+
+       PROBLEMA CORRIGIDO:
+       O código anterior usava onclick="funcao()" inline no HTML
+       gerado. Isso é frágil: em alguns cenários o re-render
+       completo ou a troca de tabs causava quebra da reatividade,
+       exigindo que o usuário fosse e voltasse para a Aba 2.
+
+       SOLUÇÃO:
+       Um único listener no container pai captura TODOS os cliques
+       dos filhos via bubbling. O handler verifica o e.target com
+       .closest('[data-action]') para identificar o elemento clicado.
+       Isso funciona em tempo real para qualquer conteúdo gerado
+       dinamicamente, sem necessidade de re-attach após re-render.
+
+       data-action="done"     → toggle de item comprado (Aba 2)
+       data-action="collapse" → expand/recolhe categoria (Aba 2)
+       data-action="qty"      → atualiza quantidade (input event)
+       data-action="price"    → atualiza preço (input event)
+       data-action="sel"      → seleciona item (Aba 1)
+       data-action="del"      → remove item (Aba 1)
+    ---------------------------------------------------------- */
+
+    function configurarDelegacaoEventos() {
+
+      /* ---- Aba 1: listaContainer ---- */
+      const lista = document.getElementById('listaContainer');
+
+      lista.addEventListener('click', e => {
+        // Checkbox de seleção em massa
+        const selEl = e.target.closest('[data-action="sel"]');
+        if (selEl) {
+          const id = selEl.dataset.id;
+          toggleSelecionado(id);
+          const item = state.items.find(i => i.id === id);
+          if (item) {
+            selEl.className = `chk ${item.selected ? 'sel' : ''}`;
+            selEl.setAttribute('aria-checked', item.selected);
+            selEl.innerHTML = item.selected ? SVG.check : '';
+          }
+          atualizarActionBar();
+          return;
+        }
+        // Botão remover item
+        const delEl = e.target.closest('[data-action="del"]');
+        if (delEl) {
+          const item = state.items.find(i => i.id === delEl.dataset.id);
+          const snap = snapshotAtual();
+          removerItem(delEl.dataset.id);
+          renderizarLista();
+          atualizarActionBar();
+          if (item) mostrarUndo(`"${item.name}" removido`, snap);
+        }
+      });
+
+      // Suporte a teclado (Enter/Space) nos checkboxes da Aba 1
+      lista.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const el = e.target.closest('[data-action="sel"]');
+        if (el) { e.preventDefault(); el.click(); }
+      });
+
+
+      /* ---- Aba 2: comprasContainer ---- */
+      const compras = document.getElementById('comprasContainer');
+
+      /**
+       * Click na Aba 2: captura "done" e "collapse" via bubbling.
+       *
+       * FIX DE REATIVIDADE:
+       * Após cada mutação de estado, chamamos renderizarCompras() diretamente.
+       * Isso garante que o DOM reflita o novo estado imediatamente, sem precisar
+       * trocar de abas. A tentativa anterior de atualização cirúrgica (partial DOM
+       * update) não era confiável em todos os cenários de interação.
+       *
+       * Nota: inputs de qty/price usam atualizarTotaisDom() (sem re-render) para
+       * preservar o foco enquanto o usuário está digitando -- comportamento correto.
+       */
+      compras.addEventListener('click', e => {
+
+        // --- Toggle de item comprado ---
+        // 1. Muta o estado  2. Persiste  3. Re-renderiza a view imediatamente
+        const doneEl = e.target.closest('[data-action="done"]');
+        if (doneEl) {
+          toggleConcluido(doneEl.dataset.id);
+          renderizarCompras();
+          return;
+        }
+
+        // --- Toggle de colapso de categoria (acordeão) ---
+        // 1. Muta o estado  2. Persiste  3. Re-renderiza a view imediatamente
+        const colEl = e.target.closest('[data-action="collapse"]');
+        if (colEl) {
+          toggleColapso(colEl.dataset.id);
+          renderizarCompras();
+          return;
+        }
+      });
+
+      // Suporte a teclado (Enter/Space) nos checkboxes e headers da Aba 2
+      compras.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const el = e.target.closest('[data-action="done"]') ||
+                   e.target.closest('[data-action="collapse"]');
+        if (el) { e.preventDefault(); el.click(); }
+      });
+
+      /**
+       * Input na Aba 2: captura qty e price sem re-render.
+       * O foco do input é mantido; apenas os totais são recalculados.
+       */
+      compras.addEventListener('input', e => {
+        const qtyEl   = e.target.closest('[data-action="qty"]');
+        const priceEl = e.target.closest('[data-action="price"]');
+        if (qtyEl)   { setQty(qtyEl.dataset.id,     qtyEl.value);   atualizarTotaisDom(); }
+        if (priceEl) { setPrice(priceEl.dataset.id, priceEl.value); atualizarTotaisDom(); }
+      });
+    }
+
+    /** Registra listeners de botões fixos (não gerados dinamicamente) */
+    function registrarEventosUI() {
+
+      // Quick input: Enter adiciona o item
+      const qi = document.getElementById('quickInput');
+      qi.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        if (adicionarItem(qi.value)) {
+          qi.value = '';
+          renderizarLista();
+          atualizarActionBar();
+          setTimeout(() => document.getElementById('mainScroll')
+            .scrollTo({ top: 99999, behavior: 'smooth' }), 50);
+        }
+        qi.focus();
+      });
+
+      // Botão [+] no rodapé da lista → foca o input
+      document.getElementById('addItemRowBtn').addEventListener('click', () => {
+        qi.focus();
+        qi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // Tabs
+      document.getElementById('tabLista')    .addEventListener('click', () => mudarView('lista'));
+      document.getElementById('tabCompras')  .addEventListener('click', () => mudarView('compras'));
+      document.getElementById('tabHistorico').addEventListener('click', () => mudarView('historico'));
+
+      // Action bar: categorizar selecionados
+      document.getElementById('btnCategorize').addEventListener('click', () => {
+        if (itensSel().length > 0) abrirModalCategoria();
+      });
+
+      // Action bar: deletar selecionados
+      document.getElementById('btnDeleteSel').addEventListener('click', () => {
+        const n = itensSel().length;
+        if (n > 0 && confirm(`Remover ${n} ${n === 1 ? 'item selecionado' : 'itens selecionados'}?`)) {
+          const snap = snapshotAtual();
+          removerSelecionados();
+          renderizarLista();
+          atualizarActionBar();
+          mostrarUndo(`${n} ${n === 1 ? 'item removido' : 'itens removidos'}`, snap);
+        }
+      });
+
+      // Modal: seleção de categoria existente (delegação no modalCatList)
+      document.getElementById('modalCatList').addEventListener('click', e => {
+        const item = e.target.closest('[data-mcat]');
+        if (!item) return;
+        modalCatId = item.dataset.mcat;
+        document.getElementById('newCatSection').classList.remove('visible');
+        document.querySelectorAll('.modal-cat-item').forEach(el => {
+          const ativo = el.dataset.mcat === modalCatId;
+          el.classList.toggle('active', ativo);
+          el.setAttribute('aria-checked', ativo);
+        });
+      });
+
+      // Modal: exibir formulário de nova categoria
+      document.getElementById('btnNewCat').addEventListener('click', () => {
+        modalCatId = null;
+        document.querySelectorAll('.modal-cat-item').forEach(el => {
+          el.classList.remove('active'); el.setAttribute('aria-checked', 'false');
+        });
+        document.getElementById('newCatSection').classList.add('visible');
+        document.getElementById('newCatInput').focus();
+      });
+
+      // Modal: delegação nos swatches de cor
+      document.getElementById('colorSwatches').addEventListener('click', e => {
+        const sw = e.target.closest('[data-color]');
+        if (sw) selecionarSwatch(sw.dataset.color, sw);
+      });
+      document.getElementById('colorSwatches').addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const sw = e.target.closest('[data-color]');
+        if (sw) { e.preventDefault(); selecionarSwatch(sw.dataset.color, sw); }
+      });
+
+      // Modal: input de cor personalizada anula swatches
+      document.getElementById('customColorInput').addEventListener('input', e => {
+        modalColor = e.target.value;
+        document.querySelectorAll('.color-swatch').forEach(el => {
+          el.classList.remove('active'); el.setAttribute('aria-checked', 'false');
+        });
+      });
+
+      // Modal: Enter no campo de nova categoria → confirma
+      document.getElementById('newCatInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('btnModalConfirm').click();
+      });
+
+      // Modal: confirmar
+      document.getElementById('btnModalConfirm').addEventListener('click', () => {
+        const sec   = document.getElementById('newCatSection');
+        const input = document.getElementById('newCatInput');
+        let targetId = modalCatId;
+
+        if (sec.classList.contains('visible') && input.value.trim()) {
+          targetId = criarCategoria(input.value.trim(), modalColor);
+        }
+
+        if (!targetId) {
+          // Guia o usuário: exibe ou foca o campo de nova categoria
+          if (!sec.classList.contains('visible')) document.getElementById('btnNewCat').click();
+          else input.focus();
+          return;
+        }
+
+        moverParaCategoria(targetId);
+        fecharOverlay('overlayCategoria');
+        renderizarTudo();
+      });
+
+      // Modal: cancelar
+      document.getElementById('btnModalCancel').addEventListener('click', () => fecharOverlay('overlayCategoria'));
+
+      // Overlay: clique fora fecha
+      document.getElementById('overlayCategoria').addEventListener('click', e => {
+        if (e.target === document.getElementById('overlayCategoria')) fecharOverlay('overlayCategoria');
+      });
+
+      // Exportar / Importar (backup manual entre aparelhos)
+      document.getElementById('btnExport').addEventListener('click', exportarDados);
+      document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFile').click());
+      document.getElementById('importFile').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) importarDados(file);
+        e.target.value = ''; // permite selecionar o mesmo arquivo de novo depois
+      });
+
+      // Tema
+      document.getElementById('btnTheme').addEventListener('click', () => {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        aplicarTema(); salvarEstado();
+      });
+
+      // Limpar tudo
+      document.getElementById('btnClearAll').addEventListener('click', () => abrirOverlay('overlayConfirm'));
+      document.getElementById('btnConfirmCancel').addEventListener('click', () => fecharOverlay('overlayConfirm'));
+      document.getElementById('btnConfirmOk').addEventListener('click', () => {
+        const snap = snapshotAtual();
+        const foiRegistrada = state.items.some(i => i.done && i.qty * i.price > 0);
+        limparTudo();
+        fecharOverlay('overlayConfirm');
+        renderizarTudo();
+        mudarView('lista');
+        mostrarUndo(
+          foiRegistrada ? 'Lista limpa e compra salva no histórico' : 'Lista limpa',
+          snap
+        );
+      });
+
+      // Toast: botão "Desfazer"
+      document.getElementById('toastUndoBtn').addEventListener('click', executarUndo);
+      document.getElementById('overlayConfirm').addEventListener('click', e => {
+        if (e.target === document.getElementById('overlayConfirm')) fecharOverlay('overlayConfirm');
+      });
+
+      // Escape fecha qualquer modal aberto
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        fecharOverlay('overlayCategoria');
+        fecharOverlay('overlayConfirm');
+      });
+    }
+
+
+    /* ----------------------------------------------------------
+       L9b -- REORDENAÇÃO POR ARRASTAR (drag reorder)
+       Usa Pointer Events (funciona com mouse E toque, sem libs
+       externas). A alça ".drag-handle" inicia o arrasto; durante o
+       movimento, o item arrastado troca de lugar com o vizinho
+       assim que cruza o meio dele. Ao soltar, a nova ordem (só
+       dentro da mesma categoria) é persistida via reordenarCategoria().
+    ---------------------------------------------------------- */
+
+    function habilitarReordenacao(container) {
+      container.addEventListener('pointerdown', e => {
+        const handle = e.target.closest('[data-drag-handle]');
+        if (!handle) return;
+        const item = handle.closest('.list-item');
+        const lista = item?.parentElement; // .cat-body-inner
+        if (!item || !lista) return;
+
+        e.preventDefault();
+        let startY = e.clientY; // ajustado a cada troca pra evitar "pulo" visual (ver abaixo)
+        item.classList.add('dragging');
+        item.style.position = 'relative';
+        item.style.zIndex = '20';
+
+        const soItens = () => Array.from(lista.children).filter(el => el.classList.contains('list-item'));
+
+        function mover(ev) {
+          const dy = ev.clientY - startY;
+          item.style.transform = `translateY(${dy}px)`;
+
+          for (const sib of soItens()) {
+            if (sib === item) continue;
+            const r = sib.getBoundingClientRect();
+            const meio = r.top + r.height / 2;
+            if (ev.clientY < meio && sib.previousElementSibling === item) {
+              lista.insertBefore(item, sib);
+              // Item subiu uma posição: compensa startY pra não "pular" visualmente
+              startY -= r.height;
+              item.style.transform = `translateY(${ev.clientY - startY}px)`;
+              break;
+            }
+            if (ev.clientY > meio && sib.nextElementSibling === item) {
+              lista.insertBefore(sib, item);
+              // Item desceu uma posição: compensa startY na direção oposta
+              startY += r.height;
+              item.style.transform = `translateY(${ev.clientY - startY}px)`;
+              break;
+            }
+          }
+        }
+
+        function soltar() {
+          item.classList.remove('dragging');
+          item.style.position = '';
+          item.style.zIndex = '';
+          item.style.transform = '';
+          document.removeEventListener('pointermove', mover);
+          document.removeEventListener('pointerup', soltar);
+
+          const catId = item.closest('.cat-group')?.dataset.cat;
+          if (catId) {
+            const novaOrdem = soItens().map(el => el.dataset.item);
+            reordenarCategoria(catId, novaOrdem);
+          }
+        }
+
+        document.addEventListener('pointermove', mover);
+        document.addEventListener('pointerup', soltar, { once: true });
+      });
+    }
+
+
+    /* ----------------------------------------------------------
+       L10 -- INICIALIZAÇÃO
+    ---------------------------------------------------------- */
+
+    function init() {
+      carregarEstado();            // 1. Carrega estado (com migração automática de schema)
+      aplicarTema();               // 2. Aplica tema salvo
+      configurarDelegacaoEventos(); // 3. Ativa delegação de eventos (antes do 1º render)
+      registrarEventosUI();         // 4. Registra listeners fixos (botões, modais)
+      habilitarReordenacao(document.getElementById('listaContainer'));   // 5. Drag reorder (Aba 1)
+      habilitarReordenacao(document.getElementById('comprasContainer')); // 5. Drag reorder (Aba 2)
+      renderizarTudo();             // 6. Render inicial
+      mudarView(state.view || 'lista'); // 7. Restaura view ativa
+      setTimeout(() => document.getElementById('quickInput')?.focus(), 100); // 8. Foca o input
+
+      // 9. PWA: registra o service worker (funcionamento offline + instalação)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {
+          console.warn('[compras] Service worker não pôde ser registrado (ok em file:// ou sem rede).');
+        });
+      }
+    }
+
+    // 🚀 Boot
+    init();
+  </script>
+</body>
+</html>
