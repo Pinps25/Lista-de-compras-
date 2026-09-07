@@ -26,6 +26,8 @@
       --clr-on-secondary:         #FFFFFF;
       --clr-secondary-container:  #CCE8E4;
       --clr-on-secondary-container: #051F1C;
+      --clr-tertiary-container:   #FFDDB3;
+      --clr-on-tertiary-container: #2B1700;
       --clr-surface:              #F4FAF8;
       --clr-surface-1:            #EBF4F2;
       --clr-on-surface:           #191C1C;
@@ -56,6 +58,8 @@
       --clr-on-secondary:         #1B3533;
       --clr-secondary-container:  #324B49;
       --clr-on-secondary-container: #CCE8E4;
+      --clr-tertiary-container:   #5C4200;
+      --clr-on-tertiary-container: #FFDDB3;
       --clr-surface:              #191C1C;
       --clr-surface-1:            #1E2322;
       --clr-on-surface:           #E0E3E2;
@@ -639,6 +643,134 @@
     .hist-summary-lbl { font-size: 10.5px; font-weight: 600; opacity: .8; margin-top: 2px; }
 
     /* =====================================================
+       INDICADOR DE SALVO (discreto, no app-bar)
+    ===================================================== */
+    .saved-flag {
+      font-size: 11px; font-weight: 700; color: var(--clr-primary);
+      opacity: 0; transition: opacity .4s var(--ease); flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .saved-flag.show { opacity: 1; }
+
+    /* =====================================================
+       BANNER DE INSTALAÇÃO DO PWA
+    ===================================================== */
+    .install-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: var(--clr-primary-container); color: var(--clr-on-primary-container);
+      padding: 10px 16px; font-size: 12.5px; font-weight: 600;
+    }
+
+    /* =====================================================
+       MENU "MAIS OPÇÕES" (bottom sheet)
+    ===================================================== */
+    .menu-section-label {
+      font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+      color: var(--clr-on-surface-var); margin: 18px 0 8px;
+    }
+    .menu-section-label:first-of-type { margin-top: 4px; }
+    .menu-item {
+      display: flex; align-items: center; gap: 14px; width: 100%;
+      padding: 12px 4px; border-radius: var(--r-md); background: transparent;
+      border: none; color: var(--clr-on-surface); font-size: 14.5px; font-weight: 500; text-align: left;
+    }
+    .menu-item:hover { background: color-mix(in srgb, var(--clr-on-surface) 5%, transparent); }
+    .menu-item svg { flex-shrink: 0; color: var(--clr-on-surface-var); }
+    .menu-item.danger { color: var(--clr-error); }
+    .menu-item.danger svg { color: var(--clr-error); }
+    .menu-item-sub { font-size: 11.5px; color: var(--clr-on-surface-var); font-weight: 400; margin-top: 1px; }
+    .menu-divider { height: 1px; background: var(--clr-outline-var); margin: 10px 0; }
+    .menu-field { margin-bottom: 6px; }
+    .menu-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--clr-on-surface-var); margin-bottom: 6px; }
+    .menu-field input[type="text"], .menu-field input[type="number"] {
+      width: 100%; padding: 11px 14px; border-radius: var(--r-md);
+      border: 1.5px solid var(--clr-outline-var); background: var(--clr-surface-1);
+      color: var(--clr-on-surface); font-size: 14px; font-family: inherit;
+    }
+    .menu-field input:focus { outline: none; border-color: var(--clr-primary); }
+    .menu-version { font-size: 11.5px; color: var(--clr-on-surface-var); text-align: center; margin-top: 18px; }
+    .menu-version button { background: none; border: none; color: var(--clr-primary); font-weight: 700; font-size: 11.5px; }
+    .changelog-list { display: none; margin-top: 10px; padding: 12px 14px; border-radius: var(--r-md); background: var(--clr-surface-1); text-align: left; }
+    .changelog-list.show { display: block; }
+    .changelog-list div { font-size: 12px; color: var(--clr-on-surface-var); line-height: 1.7; }
+    .changelog-list b { color: var(--clr-on-surface); }
+
+    /* =====================================================
+       ORÇAMENTO -- barra de progresso (Aba 2, footer)
+    ===================================================== */
+    .budget-bar-wrap { padding: 0 24px; margin-bottom: 6px; }
+    .budget-bar-track { height: 6px; border-radius: var(--r-full); background: var(--clr-surface-1); overflow: hidden; }
+    .budget-bar-fill { height: 100%; border-radius: var(--r-full); transition: width .3s var(--ease), background .3s var(--ease); }
+    .budget-bar-label { font-size: 10.5px; color: var(--clr-on-surface-var); margin-top: 4px; display: flex; justify-content: space-between; }
+
+    /* =====================================================
+       DICA DE PREÇO ANTERIOR (Aba 2)
+    ===================================================== */
+    .price-hint {
+      font-size: 10px; color: var(--clr-on-surface-var); white-space: nowrap;
+      margin-top: 2px; font-family: var(--font-mono);
+    }
+    .price-hint.up   { color: var(--clr-error); }
+    .price-hint.down { color: #2E7D32; }
+    [data-theme="dark"] .price-hint.down { color: #7ED893; }
+
+    /* =====================================================
+       "AINDA FALTA" -- banner na Aba 2
+    ===================================================== */
+    .missing-banner {
+      margin: 0 16px 12px; padding: 10px 14px; border-radius: var(--r-md);
+      background: var(--clr-tertiary-container); color: var(--clr-on-tertiary-container);
+      font-size: 12.5px; font-weight: 600; line-height: 1.5;
+    }
+
+    /* =====================================================
+       PREVISÃO DE RECOMPRA -- banner na Aba 1
+    ===================================================== */
+    .predict-banner {
+      margin-bottom: 14px; padding: 12px 14px; border-radius: var(--r-lg);
+      background: var(--clr-secondary-container); color: var(--clr-on-secondary-container);
+    }
+    .predict-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .predict-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .predict-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--clr-surface); border-radius: var(--r-full);
+      padding: 5px 6px 5px 12px; font-size: 12.5px; font-weight: 600;
+      color: var(--clr-on-surface); box-shadow: var(--shadow-1);
+    }
+    .predict-chip button {
+      width: 20px; height: 20px; border-radius: var(--r-full); background: var(--clr-primary);
+      color: var(--clr-on-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* =====================================================
+       ENTRADA POR VOZ
+    ===================================================== */
+    .mic-btn {
+      width: 40px; height: 40px; flex-shrink: 0; border-radius: var(--r-full);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--clr-on-surface-var); background: transparent;
+    }
+    .mic-btn:hover { background: color-mix(in srgb, var(--clr-on-surface) 6%, transparent); }
+    .mic-btn.listening { color: #fff; background: var(--clr-error); animation: micPulse 1.2s ease-in-out infinite; }
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--clr-error) 45%, transparent); }
+      50%      { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    /* =====================================================
+       ONBOARDING (3 telas na primeira visita)
+    ===================================================== */
+    .onboard-sheet { text-align: center; padding-top: 8px; }
+    .onboard-emoji { font-size: 56px; margin-bottom: 18px; }
+    .onboard-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+    .onboard-body  { font-size: 14px; color: var(--clr-on-surface-var); line-height: 1.65; margin-bottom: 26px; }
+    .onboard-dots  { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
+    .onboard-dot   { width: 7px; height: 7px; border-radius: var(--r-full); background: var(--clr-outline-var); transition: all .25s var(--ease); }
+    .onboard-dot.active { width: 20px; background: var(--clr-primary); }
+    .onboard-actions { display: flex; justify-content: space-between; align-items: center; }
+
+    /* =====================================================
        AUTOCOMPLETE (datalist nativo -- sem estilo custom possível,
        mas garantimos que o input aceite a lista)
     ===================================================== */
@@ -657,35 +789,23 @@
   <header class="app-bar">
     <span style="font-size:22px;line-height:1;flex-shrink:0" aria-hidden="true">🛒</span>
     <h1 class="app-bar-title">Lista de Compras</h1>
+    <span class="saved-flag" id="savedFlag" aria-hidden="true">✓ Salvo</span>
 
-    <button class="icon-btn" id="btnTheme" title="Alternar tema" aria-label="Alternar tema">
-      <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93ZM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121Zm2.121-14.85 1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121ZM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/>
-      </svg>
-      <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden">
-        <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7Zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12Z"/>
-      </svg>
-    </button>
-
-    <button class="icon-btn" id="btnExport" title="Exportar lista (backup)" aria-label="Exportar lista como arquivo">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 16 6 10l1.41-1.41L11 12.17V2h2v10.17l3.59-3.58L18 10l-6 6Zm-7 4v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
-      </svg>
-    </button>
-
-    <button class="icon-btn" id="btnImport" title="Importar lista (backup)" aria-label="Importar lista de um arquivo">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
-        <path d="m12 4 6 6-1.41 1.41L13 7.83V18h-2V7.83L7.41 11.4 6 10l6-6Zm-7 16v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
-      </svg>
-    </button>
-    <input type="file" id="importFile" accept="application/json,.json" class="hidden" aria-hidden="true"/>
-
-    <button class="icon-btn" id="btnClearAll" title="Limpar lista" aria-label="Limpar toda a lista">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5ZM6 6v14h12V6H6Zm3 3h2v8H9V9Zm4 0h2v8h-2V9Z"/>
+    <button class="icon-btn" id="btnMenu" title="Mais opções" aria-label="Abrir menu de opções">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
       </svg>
     </button>
   </header>
+
+  <!-- Banner de instalação do PWA (aparece quando o navegador permite instalar) -->
+  <div class="install-banner hidden" id="installBanner">
+    <span>📲 Instalar este app na tela inicial</span>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button class="btn btn-text" id="btnInstallDismiss" style="color:inherit">Agora não</button>
+      <button class="btn btn-filled" id="btnInstallGo" style="padding:6px 14px;font-size:12px">Instalar</button>
+    </div>
+  </div>
 
   <!-- =============================================
        NAVIGATION TABS
@@ -719,6 +839,9 @@
     <!-- VIEW 1: Criando a Lista -->
     <div class="view active" id="viewLista" role="tabpanel" aria-labelledby="tabLista">
       <div class="inner">
+        <!-- Previsão de recompra (baseada no histórico de compras) -->
+        <div id="predictBanner"></div>
+
         <div class="quick-add-wrap">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
                style="color:var(--clr-outline);flex-shrink:0" aria-hidden="true">
@@ -731,6 +854,11 @@
             aria-label="Adicionar novo item"/>
           <!-- Sugestões de autocomplete geradas a partir do histórico de itens já usados -->
           <datalist id="itemSuggestions"></datalist>
+          <button class="mic-btn hidden" id="btnMic" type="button" title="Adicionar por voz" aria-label="Adicionar item por voz">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z"/>
+            </svg>
+          </button>
         </div>
         <!-- Container de grupos de categoria (preenchido via JS) -->
         <div id="listaContainer"></div>
@@ -785,12 +913,104 @@
        FOOTER -- TOTAL GERAL (só visível na Aba 2)
   ============================================== -->
   <div class="footer-rail hidden" id="footerRail">
+    <div class="budget-bar-wrap hidden" id="budgetBarWrap">
+      <div class="budget-bar-track"><div class="budget-bar-fill" id="budgetBarFill"></div></div>
+      <div class="budget-bar-label"><span id="budgetBarText"></span><span id="budgetBarPct"></span></div>
+    </div>
     <div class="footer-inner">
       <div class="footer-meta">
         <span class="footer-label">Total da compra</span>
         <span class="footer-count" id="footerCount"></span>
       </div>
       <span class="footer-total" id="footerTotal">R$ 0,00</span>
+    </div>
+  </div>
+
+  <!-- =============================================
+       MODAL: Mais Opções (menu / configurações)
+  ============================================== -->
+  <div class="overlay" id="overlayMenu" role="dialog" aria-modal="true" aria-label="Mais opções">
+    <div class="bottom-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2 class="sheet-title">Mais opções</h2>
+
+      <div class="menu-section-label">Aparência</div>
+      <button class="menu-item" id="btnTheme">
+        <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93ZM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121Zm2.121-14.85 1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121ZM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/>
+        </svg>
+        <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+          <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7Zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12Z"/>
+        </svg>
+        <span id="themeMenuLabel">Tema escuro</span>
+      </button>
+
+      <div class="menu-section-label">Orçamento &amp; compra</div>
+      <div class="menu-field">
+        <label for="budgetInput">Teto de gasto da lista atual (R$, opcional)</label>
+        <input type="number" id="budgetInput" inputmode="decimal" min="0" step="0.01" placeholder="Ex.: 250,00"/>
+      </div>
+      <div class="menu-field">
+        <label for="buyerNameInput">Nome de quem está comprando (opcional)</label>
+        <input type="text" id="buyerNameInput" placeholder="Ex.: você mesmo" autocomplete="off"/>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-section-label">Dados</div>
+      <button class="menu-item" id="btnExport">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 16 6 10l1.41-1.41L11 12.17V2h2v10.17l3.59-3.58L18 10l-6 6Zm-7 4v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
+        </svg>
+        <span>Exportar backup (.json)</span>
+      </button>
+      <button class="menu-item" id="btnImport">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+          <path d="m12 4 6 6-1.41 1.41L13 7.83V18h-2V7.83L7.41 11.4 6 10l6-6Zm-7 16v-5h2v3h14v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>
+        </svg>
+        <span>Importar backup (.json)</span>
+      </button>
+      <input type="file" id="importFile" accept="application/json,.json" class="hidden" aria-hidden="true"/>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-section-label">Ajuda</div>
+      <button class="menu-item" id="btnShowOnboarding">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm2.07-7.75-.9.92C13.45 10.9 13 11.5 13 13h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25Z"/>
+        </svg>
+        <span>Ver introdução novamente</span>
+      </button>
+
+      <div class="menu-divider"></div>
+
+      <button class="menu-item danger" id="btnClearAll">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6H2V4h5ZM6 6v14h12V6H6Zm3 3h2v8H9V9Zm4 0h2v8h-2V9Z"/>
+        </svg>
+        <span>Limpar lista / finalizar compra</span>
+      </button>
+
+      <div class="menu-version">
+        <span id="appVersionLabel">v2.0</span> ·
+        <button id="btnToggleChangelog" type="button">Ver novidades</button>
+        <div class="changelog-list" id="changelogList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       MODAL: Introdução (onboarding, 3 telas)
+  ============================================== -->
+  <div class="overlay" id="overlayOnboarding" role="dialog" aria-modal="true" aria-label="Introdução ao app">
+    <div class="bottom-sheet onboard-sheet" id="onboardSheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div id="onboardSlideBody"></div>
+      <div class="onboard-dots" id="onboardDots"></div>
+      <div class="onboard-actions">
+        <button class="btn btn-text" id="btnOnboardSkip">Pular</button>
+        <button class="btn btn-filled" id="btnOnboardNext">Próximo</button>
+      </div>
     </div>
   </div>
 
@@ -990,8 +1210,10 @@
       categories:      CATS_DEFAULT.map(c => ({ ...c })),
       view:            'lista',
       theme:           'light',
-      catalog:         {},   // chave: nome do item em minúsculas
+      catalog:         {},   // chave: nome normalizado (ver normalizarNome)
       purchaseHistory: [],
+      budgetLimit:     null, // teto de gasto (R$) da lista atual, opcional
+      buyerName:       '',   // nome de quem costuma comprar (opcional, cosmético)
     };
 
 
@@ -1015,6 +1237,8 @@
         // Migração: instalações antigas não tinham catálogo nem histórico
         if (!state.catalog || typeof state.catalog !== 'object') state.catalog = {};
         if (!Array.isArray(state.purchaseHistory)) state.purchaseHistory = [];
+        if (typeof state.budgetLimit !== 'number') state.budgetLimit = state.budgetLimit || null;
+        if (typeof state.buyerName !== 'string') state.buyerName = '';
       } catch (e) {
         console.warn('[compras] Falha ao carregar estado:', e);
       }
@@ -1024,9 +1248,20 @@
     function salvarEstado() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        marcarSalvo();
       } catch (e) {
         console.warn('[compras] Falha ao salvar estado:', e);
       }
+    }
+
+    /** Pisca discretamente "✓ Salvo" no app-bar após cada gravação bem-sucedida. */
+    let salvoTimer = null;
+    function marcarSalvo() {
+      const el = document.getElementById('savedFlag');
+      if (!el) return;
+      el.classList.add('show');
+      clearTimeout(salvoTimer);
+      salvoTimer = setTimeout(() => el.classList.remove('show'), 1200);
     }
 
 
@@ -1117,7 +1352,7 @@
     function adicionarItem(nome) {
       nome = nome.trim();
       if (!nome) return false;
-      const chave = nome.toLowerCase();
+      const chave = normalizarNome(nome);
       const conhecido = state.catalog[chave];
       const categoryId = conhecido && state.categories.find(c => c.id === conhecido.categoryId)
         ? conhecido.categoryId : ID_SEM_CAT;
@@ -1142,7 +1377,12 @@
     }
 
     function setQty(id, v)   { const i = state.items.find(x => x.id === id); if (i) { i.qty   = parseNum(v); salvarEstado(); } }
-    function setPrice(id, v) { const i = state.items.find(x => x.id === id); if (i) { i.price = parseNum(v); salvarEstado(); } }
+    function setPrice(id, v) {
+      const i = state.items.find(x => x.id === id);
+      if (!i) return;
+      i.price = parseNum(v);
+      salvarEstado();
+    }
 
     function moverParaCategoria(catId) {
       state.items.forEach(i => {
@@ -1154,14 +1394,30 @@
       salvarEstado();
     }
 
+    /**
+     * Normaliza um nome de item pra usar como chave do catálogo:
+     * remove acentos, colapsa espaços e ignora maiúsculas/minúsculas.
+     * Isso faz "Café", "cafe" e "  Café  " apontarem pro mesmo registro
+     * (uma forma leve de "fuzzy match" sem depender de biblioteca externa).
+     */
+    function normalizarNome(nome) {
+      return nome
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ');
+    }
+
     /** Registra/atualiza um item no catálogo de histórico (usado pelo autocomplete). */
     function atualizarCatalogo(nome, categoryId) {
-      const chave = nome.toLowerCase();
+      const chave = normalizarNome(nome);
       const atual = state.catalog[chave];
       state.catalog[chave] = {
-        name: nome,
+        name:      atual?.name || nome, // mantém a primeira grafia usada (ex.: "Café" e não "cafe")
         categoryId,
-        count: (atual?.count || 0) + 1,
+        count:     (atual?.count || 0) + 1,
+        lastPrice: atual?.lastPrice,
+        purchases: atual?.purchases || [], // datas ISO das compras finalizadas com esse item
       };
     }
 
@@ -1171,6 +1427,49 @@
         .sort((a, b) => b.count - a.count)
         .slice(0, limite)
         .map(e => e.name);
+    }
+
+    /** Retorna { texto, direcao } com o preço da última compra desse item, se houver. */
+    function dicaDePreco(nomeItem, precoAtual) {
+      const entrada = state.catalog[normalizarNome(nomeItem)];
+      if (!entrada || !entrada.lastPrice || entrada.lastPrice <= 0) return null;
+      if (precoAtual <= 0) return { texto: `última vez: ${brl(entrada.lastPrice)}`, direcao: '' };
+      if (Math.abs(precoAtual - entrada.lastPrice) < 0.01) return { texto: `igual à última vez`, direcao: '' };
+      const direcao = precoAtual > entrada.lastPrice ? 'up' : 'down';
+      const seta = direcao === 'up' ? '↑' : '↓';
+      return { texto: `${seta} era ${brl(entrada.lastPrice)}`, direcao };
+    }
+
+    /**
+     * Analisa o catálogo em busca de itens comprados repetidamente em
+     * intervalos regulares e que "já deveriam" ter sido comprados de novo
+     * -- uma previsão simples de recompra, sem nada além de aritmética
+     * de datas sobre o próprio histórico do usuário.
+     */
+    function calcularPrevisaoRecompra() {
+      const hoje = Date.now();
+      const nomesNaLista = new Set(state.items.map(i => normalizarNome(i.name)));
+      const previstos = [];
+
+      Object.entries(state.catalog).forEach(([chave, entrada]) => {
+        if (nomesNaLista.has(chave)) return;           // já está na lista atual
+        const datas = (entrada.purchases || []).map(d => new Date(d).getTime()).sort((a, b) => a - b);
+        if (datas.length < 2) return;                   // precisa de pelo menos 2 compras pra ter um padrão
+
+        const intervalos = [];
+        for (let i = 1; i < datas.length; i++) intervalos.push(datas[i] - datas[i - 1]);
+        const mediaMs = intervalos.reduce((s, v) => s + v, 0) / intervalos.length;
+        const ultimaCompra = datas[datas.length - 1];
+        const diasDesde = (hoje - ultimaCompra) / 86400000;
+        const diasMedia  = mediaMs / 86400000;
+
+        // "Provavelmente acabando" = já passou de ~85% do intervalo médio observado
+        if (diasDesde >= diasMedia * 0.85 && diasMedia >= 2) {
+          previstos.push({ name: entrada.name, diasDesde: Math.round(diasDesde) });
+        }
+      });
+
+      return previstos.sort((a, b) => b.diasDesde - a.diasDesde).slice(0, 8);
     }
 
     /**
@@ -1210,6 +1509,19 @@
       const comprados = state.items.filter(i => i.done && i.qty * i.price > 0);
       if (comprados.length === 0) return;
 
+      const agora = new Date().toISOString();
+
+      // Alimenta o catálogo com a data e o preço desta compra
+      // (base da previsão de recompra e da dica de preço "última vez")
+      comprados.forEach(i => {
+        const chave = normalizarNome(i.name);
+        const entrada = state.catalog[chave];
+        if (entrada) {
+          entrada.purchases = [...(entrada.purchases || []), agora].slice(-10);
+          entrada.lastPrice = i.price;
+        }
+      });
+
       const porCategoria = {};
       comprados.forEach(i => {
         porCategoria[i.categoryId] = (porCategoria[i.categoryId] || 0) + i.qty * i.price;
@@ -1224,7 +1536,7 @@
 
       state.purchaseHistory.unshift({
         id:    uid(),
-        date:  new Date().toISOString(),
+        date:  agora,
         total: comprados.reduce((s, i) => s + i.qty * i.price, 0),
         count: comprados.length,
         categories: categorias,
@@ -1277,7 +1589,7 @@
             <div class="cat-body-wrap"><div class="cat-body-inner">
               ${itens.length === 0
                 ? `<div style="padding:20px 16px;text-align:center;color:var(--clr-outline);font-size:13px">
-                     Nenhum item ainda -- adicione no campo acima!
+                     Nenhum item ainda -- digite acima (ou toque no 🎙️) pra adicionar!
                    </div>`
                 : itens.map(item => `
                     <div class="list-item" data-item="${item.id}">
@@ -1308,6 +1620,28 @@
 
       container.innerHTML = parts.join('');
       renderizarSugestoes();
+      renderizarPrevisao();
+    }
+
+    /** Renderiza o banner "provavelmente está acabando" com base no histórico de compras. */
+    function renderizarPrevisao() {
+      const el = document.getElementById('predictBanner');
+      if (!el) return;
+      const previstos = calcularPrevisaoRecompra();
+      if (previstos.length === 0) { el.innerHTML = ''; return; }
+
+      el.innerHTML = `
+        <div class="predict-banner">
+          <div class="predict-title">💡 Provavelmente está acabando, com base no seu histórico:</div>
+          <div class="predict-chips">
+            ${previstos.map(p => `
+              <span class="predict-chip">
+                ${esc(p.name)}
+                <button type="button" data-action="add-predicted" data-name="${esc(p.name)}" aria-label="Adicionar ${esc(p.name)}">+</button>
+              </span>
+            `).join('')}
+          </div>
+        </div>`;
     }
 
     /** Preenche o <datalist> de autocomplete com os itens mais usados no histórico. */
@@ -1335,7 +1669,16 @@
 
       document.getElementById('footerRail').classList.remove('hidden');
 
-      container.innerHTML = cats.map(cat => {
+      const todos     = state.items;
+      const compradosN = todos.filter(i => i.done).length;
+      const faltando  = todos.filter(i => !i.done);
+      const bannerFaltando = faltando.length > 0 ? `
+        <div class="missing-banner">
+          ✅ ${compradosN} de ${todos.length} ${todos.length === 1 ? 'item comprado' : 'itens comprados'}.
+          Falta${faltando.length === 1 ? '' : 'm'}: ${faltando.slice(0, 6).map(i => esc(i.name)).join(', ')}${faltando.length > 6 ? `, +${faltando.length - 6}` : ''}
+        </div>` : '';
+
+      container.innerHTML = bannerFaltando + cats.map(cat => {
         const itens    = itensDa(cat.id);
         const completa = catCompleta(cat.id);
         const colaps   = cat.collapsed;
@@ -1403,6 +1746,8 @@
                                placeholder="0,00" inputmode="decimal"
                                data-action="price" data-id="${item.id}"
                                aria-label="Preço de ${esc(item.name)}"/>
+                        <!-- data-pricehint: atualizado por atualizarTotaisDom() sem re-render -->
+                        <span class="price-hint" data-pricehint="${item.id}"></span>
                       </div>
                       <div class="item-total-cell">
                         <!-- data-itotal: atualizado por atualizarTotaisDom() sem re-render -->
@@ -1535,16 +1880,49 @@
       atualizarFooter();
     }
 
-    /** Atualiza o rodapé com total geral e contagem de progresso */
+    /** Atualiza o rodapé com total geral, contagem de progresso e barra de orçamento */
     function atualizarFooter() {
       const elTotal = document.getElementById('footerTotal');
       const elCount = document.getElementById('footerCount');
-      if (elTotal) elTotal.textContent = brl(totalGeral());
+      const total = totalGeral();
+      if (elTotal) elTotal.textContent = brl(total);
       if (elCount) {
         const done = state.items.filter(i => i.done).length;
         const tot  = state.items.length;
         elCount.textContent = `${done} de ${tot} ${tot === 1 ? 'item comprado' : 'itens comprados'}`;
       }
+
+      // Barra de orçamento (só aparece se um teto foi definido no menu "Mais opções")
+      const wrap = document.getElementById('budgetBarWrap');
+      if (wrap) {
+        if (state.budgetLimit && state.budgetLimit > 0) {
+          wrap.classList.remove('hidden');
+          const pct = Math.min(100, (total / state.budgetLimit) * 100);
+          const fill = document.getElementById('budgetBarFill');
+          const cor = pct >= 100 ? 'var(--clr-error)' : pct >= 80 ? '#E8A33D' : 'var(--clr-primary)';
+          fill.style.width = pct + '%';
+          fill.style.background = cor;
+          document.getElementById('budgetBarText').textContent =
+            `${brl(total)} de ${brl(state.budgetLimit)}`;
+          document.getElementById('budgetBarPct').textContent =
+            pct >= 100 ? 'orçamento estourado' : `${Math.round(pct)}%`;
+        } else {
+          wrap.classList.add('hidden');
+        }
+      }
+
+      atualizarDicasPreco();
+    }
+
+    /** Atualiza a dica de "preço da última vez" ao lado de cada campo de preço (Aba 2) */
+    function atualizarDicasPreco() {
+      state.items.forEach(item => {
+        const el = document.querySelector(`[data-pricehint="${item.id}"]`);
+        if (!el) return;
+        const dica = dicaDePreco(item.name, item.price);
+        el.textContent = dica ? dica.texto : '';
+        el.className = 'price-hint' + (dica && dica.direcao ? ' ' + dica.direcao : '');
+      });
     }
 
     /** Atualiza a action bar de seleção em massa */
@@ -1761,6 +2139,14 @@
         if (el) { e.preventDefault(); el.click(); }
       });
 
+      /* ---- Banner de previsão de recompra ---- */
+      document.getElementById('predictBanner').addEventListener('click', e => {
+        const btn = e.target.closest('[data-action="add-predicted"]');
+        if (!btn) return;
+        adicionarItem(btn.dataset.name);
+        renderizarLista();
+      });
+
 
       /* ---- Aba 2: comprasContainer ---- */
       const compras = document.getElementById('comprasContainer');
@@ -1953,10 +2339,48 @@
       document.getElementById('btnTheme').addEventListener('click', () => {
         state.theme = state.theme === 'light' ? 'dark' : 'light';
         aplicarTema(); salvarEstado();
+        atualizarLabelTema();
       });
 
-      // Limpar tudo
-      document.getElementById('btnClearAll').addEventListener('click', () => abrirOverlay('overlayConfirm'));
+      // Menu "Mais opções"
+      document.getElementById('btnMenu').addEventListener('click', () => {
+        document.getElementById('budgetInput').value = state.budgetLimit || '';
+        document.getElementById('buyerNameInput').value = state.buyerName || '';
+        atualizarLabelTema();
+        abrirOverlay('overlayMenu');
+      });
+      document.getElementById('overlayMenu').addEventListener('click', e => {
+        if (e.target === document.getElementById('overlayMenu')) fecharOverlay('overlayMenu');
+      });
+
+      // Orçamento e nome de quem compra: salvam ao perder o foco
+      document.getElementById('budgetInput').addEventListener('change', e => {
+        const v = parseNum(e.target.value);
+        state.budgetLimit = v > 0 ? v : null;
+        salvarEstado();
+        atualizarFooter();
+      });
+      document.getElementById('buyerNameInput').addEventListener('change', e => {
+        state.buyerName = e.target.value.trim();
+        salvarEstado();
+      });
+
+      // Ver introdução novamente
+      document.getElementById('btnShowOnboarding').addEventListener('click', () => {
+        fecharOverlay('overlayMenu');
+        setTimeout(() => abrirOnboarding(), 250);
+      });
+
+      // Changelog / novidades
+      document.getElementById('btnToggleChangelog').addEventListener('click', () => {
+        document.getElementById('changelogList').classList.toggle('show');
+      });
+
+      // Limpar tudo (agora dentro do menu -- fecha o menu antes de confirmar)
+      document.getElementById('btnClearAll').addEventListener('click', () => {
+        fecharOverlay('overlayMenu');
+        setTimeout(() => abrirOverlay('overlayConfirm'), 200);
+      });
       document.getElementById('btnConfirmCancel').addEventListener('click', () => fecharOverlay('overlayConfirm'));
       document.getElementById('btnConfirmOk').addEventListener('click', () => {
         const snap = snapshotAtual();
@@ -1982,7 +2406,18 @@
         if (e.key !== 'Escape') return;
         fecharOverlay('overlayCategoria');
         fecharOverlay('overlayConfirm');
+        fecharOverlay('overlayMenu');
       });
+
+      configurarOnboarding();
+      configurarVoz();
+      configurarInstalacaoPwa();
+    }
+
+    /** Atualiza o texto "Tema claro/escuro" dentro do menu conforme o tema atual */
+    function atualizarLabelTema() {
+      const el = document.getElementById('themeMenuLabel');
+      if (el) el.textContent = state.theme === 'dark' ? 'Tema claro' : 'Tema escuro';
     }
 
 
@@ -2058,6 +2493,190 @@
 
 
     /* ----------------------------------------------------------
+       L9c -- ONBOARDING (introdução de 3 telas na 1ª visita)
+       Usa uma chave de localStorage PRÓPRIA (fora do "state" principal)
+       porque é uma preferência do aparelho/navegador, não um dado da
+       lista de compras em si -- não deve ser exportada/importada junto
+       com o backup, nem afetada por "Limpar lista".
+    ---------------------------------------------------------- */
+
+    const ONBOARD_KEY = 'compras-onboarding-visto';
+
+    const ONBOARD_SLIDES = [
+      {
+        emoji: '🛒',
+        titulo: 'Monte sua lista rapidinho',
+        corpo: 'Digite ou fale (🎙️) o nome do item. O app aprende sozinho em qual categoria cada item costuma entrar.',
+      },
+      {
+        emoji: '✅',
+        titulo: 'Hora das compras',
+        corpo: 'Marque os itens no carrinho, ajuste quantidade e preço. Você vê o total, o orçamento e o que ainda falta em tempo real.',
+      },
+      {
+        emoji: '📊',
+        titulo: 'Histórico e funciona offline',
+        corpo: 'Toda compra finalizada fica salva na aba Histórico. E como é um PWA instalável, funciona mesmo sem internet no mercado.',
+      },
+    ];
+
+    let onboardIdx = 0;
+
+    function configurarOnboarding() {
+      document.getElementById('btnOnboardSkip').addEventListener('click', () => fecharOverlay('overlayOnboarding'));
+      document.getElementById('btnOnboardNext').addEventListener('click', () => {
+        if (onboardIdx < ONBOARD_SLIDES.length - 1) {
+          onboardIdx++;
+          renderizarSlideOnboarding();
+        } else {
+          localStorage.setItem(ONBOARD_KEY, '1');
+          fecharOverlay('overlayOnboarding');
+        }
+      });
+      document.getElementById('overlayOnboarding').addEventListener('click', e => {
+        if (e.target === document.getElementById('overlayOnboarding')) {
+          localStorage.setItem(ONBOARD_KEY, '1');
+          fecharOverlay('overlayOnboarding');
+        }
+      });
+    }
+
+    function abrirOnboarding() {
+      onboardIdx = 0;
+      renderizarSlideOnboarding();
+      abrirOverlay('overlayOnboarding');
+    }
+
+    function renderizarSlideOnboarding() {
+      const s = ONBOARD_SLIDES[onboardIdx];
+      document.getElementById('onboardSlideBody').innerHTML = `
+        <div class="onboard-emoji">${s.emoji}</div>
+        <div class="onboard-title">${esc(s.titulo)}</div>
+        <div class="onboard-body">${esc(s.corpo)}</div>
+      `;
+      document.getElementById('onboardDots').innerHTML = ONBOARD_SLIDES
+        .map((_, i) => `<span class="onboard-dot ${i === onboardIdx ? 'active' : ''}"></span>`).join('');
+      document.getElementById('btnOnboardNext').textContent =
+        onboardIdx === ONBOARD_SLIDES.length - 1 ? 'Começar' : 'Próximo';
+      localStorage.setItem(ONBOARD_KEY, '1');
+    }
+
+
+    /* ----------------------------------------------------------
+       L9d -- ENTRADA POR VOZ (Web Speech API)
+       Recurso puramente progressivo: se o navegador não suportar,
+       o botão de microfone fica oculto e nada mais é afetado.
+    ---------------------------------------------------------- */
+
+    function configurarVoz() {
+      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const btnMic = document.getElementById('btnMic');
+      if (!SpeechRecognitionCtor || !btnMic) return; // sem suporte: mantém o botão oculto
+
+      btnMic.classList.remove('hidden');
+
+      const recognizer = new SpeechRecognitionCtor();
+      recognizer.lang = 'pt-BR';
+      recognizer.interimResults = false;
+      recognizer.maxAlternatives = 1;
+
+      let ouvindo = false;
+
+      recognizer.addEventListener('result', e => {
+        const texto = e.results[0][0].transcript;
+        const qi = document.getElementById('quickInput');
+        qi.value = texto;
+        qi.focus();
+        // Seleciona o texto reconhecido pra facilitar corrigir antes de confirmar
+        qi.setSelectionRange(0, texto.length);
+      });
+
+      recognizer.addEventListener('end', () => {
+        ouvindo = false;
+        btnMic.classList.remove('listening');
+      });
+
+      recognizer.addEventListener('error', () => {
+        ouvindo = false;
+        btnMic.classList.remove('listening');
+      });
+
+      btnMic.addEventListener('click', () => {
+        if (ouvindo) { recognizer.stop(); return; }
+        try {
+          ouvindo = true;
+          btnMic.classList.add('listening');
+          recognizer.start();
+        } catch (e) {
+          ouvindo = false;
+          btnMic.classList.remove('listening');
+        }
+      });
+    }
+
+
+    /* ----------------------------------------------------------
+       L9e -- INSTALAÇÃO DO PWA (beforeinstallprompt)
+       Chrome/Android dispara esse evento quando o app é instalável;
+       guardamos o evento e mostramos um banner com botão próprio em
+       vez de depender do usuário achar a opção no menu do navegador.
+    ---------------------------------------------------------- */
+
+    const INSTALL_DISMISS_KEY = 'compras-install-dispensado-em';
+
+    function configurarInstalacaoPwa() {
+      let deferredPrompt = null;
+      const banner = document.getElementById('installBanner');
+
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Não insiste se o usuário já dispensou o banner nos últimos 7 dias
+        const dispensadoEm = Number(localStorage.getItem(INSTALL_DISMISS_KEY) || 0);
+        const diasDesde = (Date.now() - dispensadoEm) / 86400000;
+        if (diasDesde < 7) return;
+
+        banner.classList.remove('hidden');
+      });
+
+      document.getElementById('btnInstallDismiss').addEventListener('click', () => {
+        localStorage.setItem(INSTALL_DISMISS_KEY, String(Date.now()));
+        banner.classList.add('hidden');
+      });
+
+      document.getElementById('btnInstallGo').addEventListener('click', async () => {
+        banner.classList.add('hidden');
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      });
+
+      window.addEventListener('appinstalled', () => {
+        banner.classList.add('hidden');
+      });
+    }
+
+
+    /* ----------------------------------------------------------
+       L9f -- VERSÃO E NOVIDADES (changelog)
+    ---------------------------------------------------------- */
+
+    const APP_VERSION = 'v2.0';
+    const CHANGELOG = [
+      { v: 'v2.0', notas: 'Orçamento com barra de progresso, dica de preço da última compra, previsão automática de recompra, entrada por voz, arrastar pra reordenar, exportar/importar backup, aba de Histórico e app instalável offline.' },
+      { v: 'v1.0', notas: 'Lista de compras com categorias coloridas, seleção em massa e totais por categoria.' },
+    ];
+
+    function renderizarChangelog() {
+      document.getElementById('appVersionLabel').textContent = APP_VERSION;
+      document.getElementById('changelogList').innerHTML = CHANGELOG
+        .map(c => `<div><b>${esc(c.v)}</b> — ${esc(c.notas)}</div>`).join('');
+    }
+
+
+    /* ----------------------------------------------------------
        L10 -- INICIALIZAÇÃO
     ---------------------------------------------------------- */
 
@@ -2070,13 +2689,20 @@
       habilitarReordenacao(document.getElementById('comprasContainer')); // 5. Drag reorder (Aba 2)
       renderizarTudo();             // 6. Render inicial
       mudarView(state.view || 'lista'); // 7. Restaura view ativa
-      setTimeout(() => document.getElementById('quickInput')?.focus(), 100); // 8. Foca o input
+      atualizarLabelTema();         // 8. Sincroniza o texto "Tema claro/escuro" do menu
+      renderizarChangelog();        // 9. Preenche versão e novidades no menu
+      setTimeout(() => document.getElementById('quickInput')?.focus(), 100); // 10. Foca o input
 
-      // 9. PWA: registra o service worker (funcionamento offline + instalação)
+      // 11. PWA: registra o service worker (funcionamento offline + instalação)
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(() => {
           console.warn('[compras] Service worker não pôde ser registrado (ok em file:// ou sem rede).');
         });
+      }
+
+      // 12. Onboarding: mostra a introdução só na primeira visita deste navegador
+      if (!localStorage.getItem(ONBOARD_KEY)) {
+        setTimeout(() => abrirOnboarding(), 500);
       }
     }
 
