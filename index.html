@@ -308,9 +308,11 @@
 
     /* Nome do item */
     .item-name {
-      flex: 1; font-size: 15px; font-weight: 400; color: var(--clr-on-surface); line-height: 1.3;
+      flex: 1; min-width: 0; overflow-wrap: break-word; cursor: pointer;
+      font-size: 15px; font-weight: 400; color: var(--clr-on-surface); line-height: 1.3;
       transition: color var(--t-fast) var(--ease);
     }
+    .item-name:active { opacity: .6; }
     /* Riscado quando comprado */
     .item-name.done { text-decoration: line-through; color: var(--clr-on-surface-var); }
 
@@ -332,6 +334,25 @@
       outline: none; padding: 5px 4px;
       transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
       -moz-appearance: textfield;
+    }
+
+    /* =====================================================
+       STEPPER DE QUANTIDADE (Aba 1 -- "quantas quero comprar")
+    ===================================================== */
+    .qty-stepper {
+      display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+      background: var(--clr-surface-1); border-radius: var(--r-full); padding: 2px;
+    }
+    .qty-stepper-btn {
+      width: 24px; height: 24px; border-radius: var(--r-full); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--clr-primary); background: var(--clr-surface);
+      box-shadow: var(--shadow-1); font-weight: 800; font-size: 15px; line-height: 1;
+    }
+    .qty-stepper-btn:active { transform: scale(.9); }
+    .qty-stepper-val {
+      width: 26px; text-align: center; font-family: var(--font-mono);
+      font-size: 12.5px; font-weight: 700; color: var(--clr-on-surface);
     }
     .num-input::-webkit-outer-spin-button,
     .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
@@ -848,7 +869,7 @@
             <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
           </svg>
           <input class="quick-add-input" id="quickInput" type="text"
-            placeholder="Adicionar item... (Enter para confirmar)"
+            placeholder="Adicionar item... ex.: Arroz 5kg 3 unidades"
             autocomplete="off" autocorrect="off" enterkeyhint="done"
             list="itemSuggestions"
             aria-label="Adicionar novo item"/>
@@ -1349,15 +1370,30 @@
      * histórico), a categoria usada da última vez é aplicada automaticamente
      * -- em vez de cair sempre em "Sem Categoria".
      */
-    function adicionarItem(nome) {
-      nome = nome.trim();
+    function adicionarItem(textoBruto) {
+      textoBruto = textoBruto.trim();
+      if (!textoBruto) return false;
+
+      // Extrai uma quantidade dita/digitada junto do nome (ex.: "Arroz 5kg 3 unidades")
+      const { nome, qty } = extrairQuantidade(textoBruto);
       if (!nome) return false;
+
       const chave = normalizarNome(nome);
+
+      // Já existe esse item na lista atual? Em vez de duplicar a linha, soma a quantidade
+      // -- evita "Leite" e "leite" virarem dois itens separados só porque você pediu de novo.
+      const existente = state.items.find(i => normalizarNome(i.name) === chave);
+      if (existente) {
+        existente.qty += (qty || 1);
+        salvarEstado();
+        return true;
+      }
+
       const conhecido = state.catalog[chave];
       const categoryId = conhecido && state.categories.find(c => c.id === conhecido.categoryId)
         ? conhecido.categoryId : ID_SEM_CAT;
       state.items.push({ id: uid(), name: nome, categoryId,
-                          selected: false, done: false, qty: 1, price: 0 });
+                          selected: false, done: false, qty: qty || 1, price: 0 });
       atualizarCatalogo(nome, categoryId);
       salvarEstado();
       return true;
@@ -1365,6 +1401,28 @@
 
     function removerItem(id)       { state.items = state.items.filter(i => i.id !== id); salvarEstado(); }
     function removerSelecionados() { state.items = state.items.filter(i => !i.selected); salvarEstado(); }
+
+    /** Renomeia um item já existente (corrige typo, adiciona detalhe etc.) sem perder qty/preço/status. */
+    function renomearItem(id, novoNome) {
+      const item = state.items.find(i => i.id === id);
+      novoNome = (novoNome || '').trim();
+      if (!item || !novoNome) return false;
+      item.name = novoNome;
+      atualizarCatalogo(novoNome, item.categoryId);
+      salvarEstado();
+      return true;
+    }
+
+    /** Abre um prompt simples pra editar o nome de um item (chamado pela Aba 1 e pela Aba 2). */
+    function abrirRenomear(id) {
+      const item = state.items.find(i => i.id === id);
+      if (!item) return;
+      const novo = prompt('Editar nome do item:', item.name);
+      if (novo !== null && novo.trim() && novo.trim() !== item.name) {
+        renomearItem(id, novo);
+        renderizarTudo();
+      }
+    }
 
     function toggleSelecionado(id) {
       const item = state.items.find(i => i.id === id);
@@ -1392,6 +1450,70 @@
         }
       });
       salvarEstado();
+    }
+
+    /**
+     * Interpreta uma quantidade dita/digitada junto do nome do item, como
+     * "Arroz 5kg 3 unidades", "3x Detergente", "Leite x2" ou "duas caixas
+     * de leite" (número por extenso, útil pro reconhecimento de voz).
+     * Só reconhece quando há uma palavra de quantidade explícita
+     * (unidades/pacotes/caixas/itens/"x") -- não mexe em números que já
+     * fazem parte do nome do produto, tipo "Arroz 5kg" ou "Refrigerante 2L".
+     * Retorna { nome, qty } -- qty é null quando nada foi reconhecido.
+     */
+    const PALAVRAS_NUM = {
+      um: 1, uma: 1, dois: 2, duas: 2, tres: 3, três: 3, quatro: 4, cinco: 5,
+      seis: 6, sete: 7, oito: 8, nove: 9, dez: 10, onze: 11, doze: 12,
+      treze: 13, catorze: 14, quatorze: 14, quinze: 15, dezesseis: 16,
+      dezessete: 17, dezoito: 18, dezenove: 19, vinte: 20,
+    };
+    const QTY_TOKEN  = '(\\d+|' + Object.keys(PALAVRAS_NUM).join('|') + ')';
+    const UNID_TOKEN = '(unidades?|unid\\.?|un\\.?|pacotes?|pct\\.?|caixas?|cx\\.?|itens?|garrafas?|latas?|potes?|sacos?|kits?)';
+
+    function paraNumero(token) {
+      const t = token.toLowerCase();
+      return /^\d+$/.test(t) ? parseInt(t, 10) : (PALAVRAS_NUM[t] || null);
+    }
+
+    function extrairQuantidade(textoBruto) {
+      const texto = textoBruto.trim();
+
+      // "3 caixas de leite" / "duas unidades de arroz" -- qty + unidade + "de" + Nome
+      let m = texto.match(new RegExp(`^${QTY_TOKEN}\\s+${UNID_TOKEN}\\s+de\\s+(.+)$`, 'i'));
+      if (m) {
+        const q = paraNumero(m[1]);
+        if (q) return { nome: m[3].trim(), qty: q };
+      }
+
+      // "3x Nome" / "3 x Nome" / "duas x Nome" no INÍCIO
+      m = texto.match(new RegExp(`^${QTY_TOKEN}\\s*x\\s+(.+)$`, 'i'));
+      if (m) {
+        const q = paraNumero(m[1]);
+        if (q) return { nome: m[2].trim(), qty: q };
+      }
+
+      // "Nome 3 unidades" / "Nome três caixas" no FINAL
+      m = texto.match(new RegExp(`^(.+?)\\s+${QTY_TOKEN}\\s+${UNID_TOKEN}\\.?\\s*$`, 'i'));
+      if (m) {
+        const q = paraNumero(m[2]);
+        if (q) return { nome: m[1].trim(), qty: q };
+      }
+
+      // "Nome 3un" (sem espaço antes da unidade) no final
+      m = texto.match(new RegExp(`^(.+?)\\s+${QTY_TOKEN}(unidades?|un|pct|cx)\\.?\\s*$`, 'i'));
+      if (m) {
+        const q = paraNumero(m[2]);
+        if (q) return { nome: m[1].trim(), qty: q };
+      }
+
+      // "Nome x3" / "Nome x duas" no final
+      m = texto.match(new RegExp(`^(.+?)\\s*x\\s*${QTY_TOKEN}\\s*$`, 'i'));
+      if (m) {
+        const q = paraNumero(m[2]);
+        if (q) return { nome: m[1].trim(), qty: q };
+      }
+
+      return { nome: texto, qty: null };
     }
 
     /**
@@ -1603,7 +1725,16 @@
                            aria-label="Selecionar ${esc(item.name)}">
                         ${item.selected ? SVG.check : ''}
                       </div>
-                      <span class="item-name">${esc(item.name)}</span>
+                      <span class="item-name" data-action="rename" data-id="${item.id}"
+                            title="Toque para editar o nome">${esc(item.name)}</span>
+
+                      <!-- Stepper de quantidade desejada -- mesmo item.qty usado na Aba 2 -->
+                      <div class="qty-stepper">
+                        <button type="button" class="qty-stepper-btn" data-action="qty-dec" data-id="${item.id}" aria-label="Diminuir quantidade">−</button>
+                        <span class="qty-stepper-val">${item.qty}</span>
+                        <button type="button" class="qty-stepper-btn" data-action="qty-inc" data-id="${item.id}" aria-label="Aumentar quantidade">+</button>
+                      </div>
+
                       <button class="icon-btn"
                               style="width:32px;height:32px;color:var(--clr-outline)"
                               data-action="del" data-id="${item.id}"
@@ -1725,7 +1856,8 @@
                       ${item.done ? SVG.check : ''}
                     </div>
 
-                    <span class="item-name ${item.done ? 'done' : ''}">${esc(item.name)}</span>
+                    <span class="item-name ${item.done ? 'done' : ''}" data-action="rename" data-id="${item.id}"
+                          title="Toque para editar o nome">${esc(item.name)}</span>
 
                     <div class="item-inputs">
                       <div class="input-group">
@@ -1972,6 +2104,7 @@
       state.items           = undoSnapshot.items;
       state.categories      = undoSnapshot.categories;
       state.purchaseHistory = undoSnapshot.purchaseHistory;
+      state.catalog          = undoSnapshot.catalog;
       salvarEstado();
       esconderUndo();
       renderizarTudo();
@@ -1982,6 +2115,7 @@
       items:           JSON.parse(JSON.stringify(state.items)),
       categories:      JSON.parse(JSON.stringify(state.categories)),
       purchaseHistory: JSON.parse(JSON.stringify(state.purchaseHistory)),
+      catalog:         JSON.parse(JSON.stringify(state.catalog)),
     });
 
 
@@ -2129,6 +2263,20 @@
           renderizarLista();
           atualizarActionBar();
           if (item) mostrarUndo(`"${item.name}" removido`, snap);
+          return;
+        }
+        // Renomear item (toque no nome)
+        const renEl = e.target.closest('[data-action="rename"]');
+        if (renEl) { abrirRenomear(renEl.dataset.id); return; }
+        // Stepper de quantidade desejada (+/-)
+        const qtyBtn = e.target.closest('[data-action="qty-inc"], [data-action="qty-dec"]');
+        if (qtyBtn) {
+          const item = state.items.find(i => i.id === qtyBtn.dataset.id);
+          if (!item) return;
+          const delta = qtyBtn.dataset.action === 'qty-inc' ? 1 : -1;
+          setQty(item.id, Math.max(1, item.qty + delta));
+          qtyBtn.parentElement.querySelector('.qty-stepper-val').textContent =
+            state.items.find(i => i.id === item.id).qty;
         }
       });
 
@@ -2164,6 +2312,10 @@
        * preservar o foco enquanto o usuário está digitando -- comportamento correto.
        */
       compras.addEventListener('click', e => {
+
+        // --- Renomear item (toque no nome) ---
+        const renEl = e.target.closest('[data-action="rename"]');
+        if (renEl) { abrirRenomear(renEl.dataset.id); return; }
 
         // --- Toggle de item comprado ---
         // 1. Muta o estado  2. Persiste  3. Re-renderiza a view imediatamente
