@@ -11,7 +11,7 @@
    nova em vez de continuar servindo a antiga do cache.
 ================================================================== */
 
-const CACHE_NAME = 'lista-compras-v3';
+const CACHE_NAME = 'lista-compras-v4';
 
 const APP_SHELL = [
   './',
